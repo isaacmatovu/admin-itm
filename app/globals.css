@@ -1,0 +1,437 @@
+@import "tailwindcss";
+
+/* ══════════════════════════════════════════════════════════════════════
+   Design system — a clean, elevated dashboard look (soft neutral canvas,
+   white cards, rounded corners, a single Google-blue accent, subtle
+   Material-style shadows) in place of the earlier wireframe/blueprint
+   treatment. Token and class NAMES are kept stable on purpose — every
+   screen references them via var(--...)/className, so redefining values
+   here cascades the whole redesign without touching each page.
+   ══════════════════════════════════════════════════════════════════════ */
+
+:root {
+  --color-bg: #f6f8fc;
+  --color-surface: #ffffff;
+  --color-text: #1f2430;
+  --color-accent: #1a73e8;
+  --color-accent-2: #1765cc;
+  --color-divider: color-mix(in srgb, #1f2430 10%, transparent);
+
+  --color-neutral-100: #f6f8fa;
+  --color-neutral-200: #eceff3;
+  --color-neutral-300: #dde1e7;
+  --color-neutral-400: #c3c9d1;
+  --color-neutral-500: #9aa2ad;
+  --color-neutral-600: #767e8a;
+  --color-neutral-700: #565e6a;
+  --color-neutral-800: #383e48;
+  --color-neutral-900: #21252c;
+
+  --color-accent-100: #eaf1fd;
+  --color-accent-200: #d2e3fc;
+  --color-accent-300: #a8c7fa;
+  --color-accent-400: #7ba7f5;
+  --color-accent-500: #4c8beb;
+  --color-accent-600: #1a73e8;
+  --color-accent-700: #1558b0;
+  --color-accent-800: #123f7f;
+  --color-accent-900: #0e2a54;
+
+  --font-heading: var(--font-inter), system-ui, sans-serif;
+  --font-heading-weight: 600;
+  --font-body: var(--font-inter), system-ui, sans-serif;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 1px 2px color-mix(in srgb, #21252c 8%, transparent), 0 1px 1px color-mix(in srgb, #21252c 6%, transparent);
+  --shadow-md: 0 4px 12px color-mix(in srgb, #21252c 12%, transparent), 0 1px 3px color-mix(in srgb, #21252c 8%, transparent);
+  --shadow-lg: 0 12px 32px color-mix(in srgb, #21252c 18%, transparent), 0 2px 8px color-mix(in srgb, #21252c 10%, transparent);
+
+  /* Product-specific status tokens — one pair per approval/work-status
+     badge variant, plus the overdue accent. Soft tinted backgrounds with a
+     saturated foreground, matching Google's own status-chip palette. */
+  --st-pending: #b06000;
+  --st-pending-bg: #fef7e0;
+  --st-changes: #c5221f;
+  --st-changes-bg: #fce8e6;
+  --st-approved: #137333;
+  --st-approved-bg: #e6f4ea;
+  --st-idle: #5f6368;
+  --st-idle-bg: #f1f3f4;
+  --st-progress: #1967d2;
+  --st-progress-bg: #e8f0fe;
+  --st-over: #c5221f;
+}
+
+/* Dark theme: an explicit user choice stamps data-itm-theme on <html>
+   (see the inline script in app/layout.tsx, and theme/ThemeToggle.tsx).
+   The "system" default (no attribute) falls back to prefers-color-scheme. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-itm-theme="light"]) {
+    --color-bg: #131417;
+    --color-surface: #1e2025;
+    --color-text: #e8eaed;
+    --color-accent: #8ab4f8;
+    --color-accent-2: #aecbfa;
+    --color-divider: color-mix(in srgb, #e8eaed 14%, transparent);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
+    --st-pending: #fdd663;
+    --st-pending-bg: #3a2f14;
+    --st-changes: #f28b82;
+    --st-changes-bg: #3d211f;
+    --st-approved: #81c995;
+    --st-approved-bg: #1c3324;
+    --st-idle: #c4c7c5;
+    --st-idle-bg: #2b2d31;
+    --st-progress: #8ab4f8;
+    --st-progress-bg: #1e2c42;
+    --st-over: #f28b82;
+  }
+}
+:root[data-itm-theme="dark"] {
+  --color-bg: #131417;
+  --color-surface: #1e2025;
+  --color-text: #e8eaed;
+  --color-accent: #8ab4f8;
+  --color-accent-2: #aecbfa;
+  --color-divider: color-mix(in srgb, #e8eaed 14%, transparent);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
+  --st-pending: #fdd663;
+  --st-pending-bg: #3a2f14;
+  --st-changes: #f28b82;
+  --st-changes-bg: #3d211f;
+  --st-approved: #81c995;
+  --st-approved-bg: #1c3324;
+  --st-idle: #c4c7c5;
+  --st-idle-bg: #2b2d31;
+  --st-progress: #8ab4f8;
+  --st-progress-bg: #1e2c42;
+  --st-over: #f28b82;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.55;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  margin: 0 0 var(--space-2);
+}
+a { color: var(--color-accent); text-underline-offset: 3px; text-decoration: none; }
+a:hover { color: var(--color-accent-2); text-decoration: underline; }
+img { display: block; max-width: 100%; }
+:focus { outline: none; }
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 2px; }
+::selection { background: color-mix(in srgb, var(--color-accent) 28%, transparent); }
+.text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+
+@keyframes itmpulse {
+  0%, 100% { opacity: 0.28; }
+  50% { opacity: 0.12; }
+}
+.sk {
+  background: var(--color-text);
+  border-radius: var(--radius-sm);
+  animation: itmpulse 1.6s ease-in-out infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sk { animation: none; opacity: 0.2; }
+}
+
+/* — card frame: every panel, figure and stat card in the app — a soft
+     white (surface) card, rounded corners, hairline border, gentle
+     elevation that lifts slightly on hover. — */
+.blueprint {
+  position: relative;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+a.blueprint:hover,
+button.blueprint:hover {
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--color-text) 16%, transparent);
+}
+
+/* — buttons — */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  text-decoration: none;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 1.2;
+  color: var(--color-text);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: var(--space-2) calc(var(--space-3) * 1.35);
+  border-radius: var(--radius-md);
+  /* A comfortable touch target by default everywhere — most call sites
+     don't set their own minHeight, only the ones that need something
+     bigger/smaller do. */
+  min-height: 40px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+.btn svg { display: block; }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary { background: var(--color-accent); color: #fff; box-shadow: var(--shadow-sm); }
+.btn-primary:hover:not(:disabled) { background: var(--color-accent-2); box-shadow: var(--shadow-md); }
+.btn-primary:active:not(:disabled) { background: var(--color-accent-700); box-shadow: none; }
+.btn-secondary { border-color: var(--color-divider); background: var(--color-surface); }
+.btn-secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--color-text) 5%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-text) 22%, transparent); }
+.btn-secondary:active:not(:disabled) { background: color-mix(in srgb, var(--color-text) 9%, var(--color-surface)); }
+.btn-ghost { color: var(--color-accent); padding-inline: var(--space-2); border-color: transparent; }
+.btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
+.btn-ghost:active:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
+.btn-icon { width: 38px; height: 38px; padding: 0; border-radius: var(--radius-md); }
+.btn-block { width: 100%; margin-top: var(--space-2); }
+
+/* — forms — */
+.field > label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 6px;
+  color: color-mix(in srgb, var(--color-text) 68%, transparent);
+}
+.input {
+  width: 100%;
+  min-height: 40px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--color-text);
+  caret-color: var(--color-accent);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 30%, transparent); }
+.input:focus-visible {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
+  outline-offset: 0;
+}
+textarea.input { min-height: 96px; resize: vertical; }
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  gap: 2px;
+  background: color-mix(in srgb, var(--color-text) 6%, var(--color-surface));
+  border: 1px solid var(--color-divider);
+  border-radius: var(--radius-md);
+}
+.seg-opt {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  border-radius: calc(var(--radius-md) - 4px);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.seg-opt input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.seg-opt:has(input:checked) { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); }
+.seg-opt:not(:has(input:checked)):hover { color: var(--color-text); }
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+/* — tags / badges — */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
+.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+
+/* — cards — */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  box-shadow: var(--shadow-sm);
+}
+.card-kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-accent); }
+.card-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 17px; line-height: 1.3; }
+.card-body { margin: 0; font-size: 13.5px; opacity: 0.75; flex: 1; }
+.card-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: color-mix(in srgb, var(--color-text) 50%, transparent); }
+.elev-sm { box-shadow: var(--shadow-sm); }
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
+/* — tables — */
+.table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+.table th {
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--color-text) 62%, transparent);
+  padding: 11px 14px;
+  border-bottom: 1px solid var(--color-divider);
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--color-text) 3%, var(--color-surface));
+}
+.table th:first-child { border-top-left-radius: var(--radius-md); }
+.table th:last-child { border-top-right-radius: var(--radius-md); }
+.table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-divider);
+}
+.table tbody tr { transition: background-color 0.1s ease; }
+.table tbody tr:hover { background: color-mix(in srgb, var(--color-accent) 4%, transparent); }
+.table tbody tr:last-child td { border-bottom: none; }
+
+/* — dialog (native <dialog>, see components/ui/Modal.tsx) — */
+dialog.dialog {
+  width: min(560px, calc(100vw - 2 * var(--space-4)));
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: transparent;
+  overscroll-behavior: contain;
+}
+dialog.dialog::backdrop {
+  background: color-mix(in srgb, #0b1220 55%, transparent);
+}
+.dialog-panel {
+  background: var(--color-surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 18px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 85vh;
+  overflow: auto;
+}
+@media (min-width: 640px) {
+  .dialog-panel { padding: 26px 28px; gap: 18px; }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   App shell — mobile-first. Base rules below are the small-viewport
+   layout: a sticky top bar + an off-canvas drawer (components/shell/
+   Sidebar.tsx) that slides in over the content. The single min-width
+   query at the bottom switches to the desktop layout: a persistent left
+   column, no top bar. One breakpoint (880px) is all this shell needs.
+   ══════════════════════════════════════════════════════════════════════ */
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+.app-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 56px;
+  padding: 0 10px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-divider);
+}
+.app-main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 16px 14px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.app-sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  width: min(86vw, 288px);
+  transform: translateX(-100%);
+  transition: transform 0.2s ease;
+  z-index: 40;
+  overflow-y: auto;
+  box-sizing: border-box;
+}
+.app-sidebar[data-open="true"] {
+  transform: translateX(0);
+  box-shadow: var(--shadow-lg);
+}
+.app-sidebar-close { display: inline-flex; }
+.app-backdrop {
+  position: fixed;
+  inset: 0;
+  background: color-mix(in srgb, #0b1220 45%, transparent);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+.app-backdrop[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (min-width: 880px) {
+  .app-shell { flex-direction: row; }
+  .app-topbar { display: none; }
+  .app-sidebar {
+    position: static;
+    transform: none;
+    width: 260px;
+    flex: none;
+    box-shadow: none;
+    z-index: auto;
+  }
+  .app-sidebar-close { display: none; }
+  .app-backdrop { display: none; }
+  .app-main { padding: 28px 32px 60px; max-width: 1280px; }
+}

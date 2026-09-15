@@ -1,0 +1,1395 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap">
+<link rel="stylesheet" href="_ds/industry-65f549d4-fc9f-45f3-b3d4-20783b24575b/styles.css">
+<script src="_ds/industry-65f549d4-fc9f-45f3-b3d4-20783b24575b/_ds_bundle.js"></script>
+<style>
+  body { margin: 0; background: var(--color-bg); }
+  :root {
+    --st-pending: #8a6410; --st-pending-bg: #f6ecd6;
+    --st-changes: #9c3f26; --st-changes-bg: #f8e2da;
+    --st-approved: #2f6b45; --st-approved-bg: #dceee2;
+    --st-idle: #5d5d60; --st-idle-bg: #e4e4e7;
+    --st-progress: #2c455d; --st-progress-bg: #dbe8f4;
+    --st-over: #9c3f26;
+  }
+  :root[data-itm-theme="dark"] {
+    --color-bg: #17191b; --color-surface: #1f2226; --color-text: #e6e7e9;
+    --color-accent: #7fa6cc; --color-accent-2: #7fa6cc;
+    --color-divider: color-mix(in srgb, #e6e7e9 20%, transparent);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,.5);
+    --shadow-md: 0 3px 10px rgba(0,0,0,.55);
+    --shadow-lg: 0 14px 34px rgba(0,0,0,.6);
+    --st-pending: #e8c274; --st-pending-bg: #3a3018;
+    --st-changes: #e8a189; --st-changes-bg: #3d2620;
+    --st-approved: #93cfa9; --st-approved-bg: #1e3227;
+    --st-idle: #b7b7ba; --st-idle-bg: #2c2f33;
+    --st-progress: #a9c8e6; --st-progress-bg: #22303d;
+    --st-over: #e8a189;
+  }
+  a { color: var(--color-accent); text-decoration: none; }
+  a:hover { color: var(--color-accent-600); text-decoration: underline; }
+  @keyframes itmpulse { 0%,100% { opacity: .28 } 50% { opacity: .12 } }
+  .sk { background: var(--color-text); border-radius: 2px; animation: itmpulse 1.6s ease-in-out infinite; }
+</style>
+</helmet>
+
+<div style="min-height: 100vh; background: var(--color-bg); color: var(--color-text); font-family: var(--font-body); font-size: 15px; display: flex; flex-direction: column;">
+
+  <!-- REVIEW BAR (outside the product) -->
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 18px; padding: 10px 18px; background: var(--color-accent-900); color: #eef2f6; position: sticky; top: 0; z-index: 40;">
+    <div style="display: flex; align-items: baseline; gap: 8px; margin-right: auto;">
+      <span style="font-family: var(--font-heading); font-size: 17px; letter-spacing: .12em; text-transform: uppercase;">ITM Africa</span>
+      <span style="font-size: 11px; letter-spacing: .16em; text-transform: uppercase; opacity: .6;">Staff App · Screen Spec v1.0</span>
+    </div>
+    <span style="font-size: 11px; letter-spacing: .16em; text-transform: uppercase; padding: 5px 11px; border: 1px solid rgba(238,242,246,.35);">Staff application</span>
+    <button type="button" onClick="{{ toggleTheme }}" style="display: flex; align-items: center; gap: 7px; background: none; border: 1px solid rgba(238,242,246,.35); color: inherit; font: inherit; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; padding: 6px 11px; cursor: pointer;" style-hover="background:rgba(238,242,246,.12)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M19.1 4.9l-1.4 1.4M6.3 17.7l-1.4 1.4"></path></svg>
+      {{ themeLabel }}
+    </button>
+  </div>
+
+  <!-- STATE BAR -->
+  <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 9px 18px; background: var(--color-surface); border-bottom: 1px solid var(--color-divider);">
+    <span style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .55; font-family: var(--font-heading);">{{ screenId }} states</span>
+    <sc-for list="{{ stateChips }}" as="c" hint-placeholder-count="4">
+      <button type="button" onClick="{{ c.pick }}" style="{{ c.style }}" style-hover="border-color:var(--color-accent)">{{ c.label }}</button>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; flex-wrap: wrap; align-items: stretch; flex: 1;">
+
+    <!-- SIDEBAR -->
+    <nav style="flex: 1 1 200px; max-width: 244px; min-width: 190px; background: var(--color-surface); border-right: 1px solid var(--color-divider); padding: 20px 0 30px; display: flex; flex-direction: column; gap: 22px;">
+      <div style="padding: 0 18px; display: flex; align-items: center; gap: 10px;">
+        <span style="width: 26px; height: 26px; flex: none; background: var(--color-accent); display: grid; place-items: center; color: var(--color-bg); font-family: var(--font-heading); font-size: 13px;">IT</span>
+        <span style="font-family: var(--font-heading); font-size: 15px; letter-spacing: .08em; text-transform: uppercase; line-height: 1.1;">{{ appName }}</span>
+      </div>
+      <sc-for list="{{ navGroups }}" as="g" hint-placeholder-count="2">
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+          <div style="padding: 0 18px 6px; font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .45; font-family: var(--font-heading);">{{ g.label }}</div>
+          <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+            <button type="button" onClick="{{ it.go }}" style="{{ it.style }}" style-hover="background:color-mix(in srgb, var(--color-text) 6%, transparent)">
+              <span style="font-size: 9px; letter-spacing: .08em; opacity: .55; font-variant-numeric: tabular-nums;">{{ it.id }}</span>
+              <span>{{ it.label }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-for>
+      <div style="margin-top: auto; padding: 16px 18px 0; border-top: 1px solid var(--color-divider); display: flex; align-items: center; gap: 10px;">
+        <span style="width: 30px; height: 30px; flex: none; border: 1px solid var(--color-divider); display: grid; place-items: center; font-size: 12px; letter-spacing: .04em;">{{ userInitials }}</span>
+        <div style="min-width: 0;">
+          <div style="font-size: 13px; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ userName }}</div>
+          <div style="font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .5;">{{ userRole }}</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- MAIN -->
+    <main style="flex: 999 1 460px; min-width: 0; padding: 26px 22px 60px; display: flex; flex-direction: column; gap: 22px;">
+
+      <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 10px 20px; border-bottom: 1px solid var(--color-divider); padding-bottom: 12px;">
+        <div>
+          <div style="font-size: 10px; letter-spacing: .18em; text-transform: uppercase; color: var(--color-accent-700); font-family: var(--font-heading);">{{ screenId }} · {{ screenRoute }}</div>
+          <h2 style="margin: 2px 0 0; font-size: 30px;">{{ screenTitle }}</h2>
+        </div>
+        <div style="font-size: 12px; opacity: .6; max-width: 46ch; text-wrap: pretty;">{{ screenNote }}</div>
+      </div>
+
+      <!-- ══ TT-01 LOGIN ══ -->
+      <sc-if value="{{ isTT01 }}">
+        <div style="display: grid; place-items: center; min-height: 440px; padding: 20px 0;">
+          <div class="blueprint" style="width: 100%; max-width: 400px; padding: 40px 34px; display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <span style="width: 46px; height: 46px; background: var(--color-accent); display: grid; place-items: center; color: var(--color-bg); font-family: var(--font-heading); font-size: 19px;">IT</span>
+            <div>
+              <div style="font-family: var(--font-heading); font-size: 24px; letter-spacing: .1em; text-transform: uppercase; line-height: 1.1;">ITM Africa</div>
+              <div style="font-size: 13px; letter-spacing: .18em; text-transform: uppercase; opacity: .55; margin-top: 4px;">Task Tracking</div>
+            </div>
+            <sc-if value="{{ tt01Error }}">
+              <div style="width: 100%; display: flex; gap: 9px; align-items: flex-start; text-align: left; padding: 10px 12px; background: var(--st-changes-bg); color: var(--st-changes); border-left: 2px solid var(--st-changes); font-size: 13px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+                <span>Sign-in failed, please try again.</span>
+              </div>
+            </sc-if>
+            <button type="button" class="btn btn-secondary" style="width: 100%; min-height: 46px; gap: 10px; font-size: 14px; background: var(--color-bg); border-color: color-mix(in srgb, var(--color-text) 32%, transparent);" style-hover="background:color-mix(in srgb, var(--color-text) 6%, transparent)">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="9"></circle><path d="M21 12h-9V8"></path></svg>
+              <span>{{ tt01ButtonLabel }}</span>
+            </button>
+            <sc-if value="{{ tt01Redirecting }}">
+              <div style="display: flex; align-items: center; gap: 8px; font-size: 12px; opacity: .6;">
+                <span class="sk" style="width: 60px; height: 3px;"></span>
+                <span>Redirecting to Google…</span>
+              </div>
+            </sc-if>
+            <div style="font-size: 12.5px; opacity: .6; max-width: 28ch;">Use your ITM Africa Google account to continue.</div>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; align-items: flex-start; padding: 12px 14px; border: 1px dashed var(--color-divider); font-size: 12.5px; opacity: .75;">
+          <span style="font-family: var(--font-heading); color: var(--color-accent-700);">NOTE</span>
+          <span>One button, no distractions. No ITM password form, no self-registration, no forgot-password flow — every Google login creates or matches a local account. §4.1</span>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-02 2FA ══ -->
+      <sc-if value="{{ isTT02 }}">
+        <div style="display: grid; place-items: center; min-height: 440px; padding: 20px 0;">
+          <div class="blueprint" style="width: 100%; max-width: 430px; padding: 34px 30px; display: flex; flex-direction: column; gap: 20px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5"><rect x="4" y="10" width="16" height="11" rx="1"></rect><path d="M8 10V7a4 4 0 018 0v3"></path></svg>
+              <div style="font-family: var(--font-heading); font-size: 20px; letter-spacing: .06em; text-transform: uppercase;">{{ tt02Heading }}</div>
+            </div>
+            <div style="font-size: 13px; opacity: .7; text-wrap: pretty;">{{ tt02Helper }}</div>
+
+            <sc-if value="{{ tt02Enroll }}">
+              <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: center; padding: 16px; background: var(--color-surface); border: 1px solid var(--color-divider);">
+                <div style="width: 122px; height: 122px; flex: none; background: var(--color-bg); border: 1px solid var(--color-divider); display: grid; place-items: center;">
+                  <svg width="96" height="96" viewBox="0 0 21 21" shape-rendering="crispEdges"><rect width="21" height="21" fill="none"></rect><g fill="currentColor"><rect x="1" y="1" width="5" height="5"></rect><rect x="2" y="2" width="3" height="3" fill="var(--color-bg)"></rect><rect x="3" y="3" width="1" height="1"></rect><rect x="15" y="1" width="5" height="5"></rect><rect x="16" y="2" width="3" height="3" fill="var(--color-bg)"></rect><rect x="17" y="3" width="1" height="1"></rect><rect x="1" y="15" width="5" height="5"></rect><rect x="2" y="16" width="3" height="3" fill="var(--color-bg)"></rect><rect x="3" y="17" width="1" height="1"></rect><rect x="8" y="1" width="1" height="2"></rect><rect x="10" y="2" width="1" height="3"></rect><rect x="12" y="1" width="1" height="1"></rect><rect x="8" y="4" width="2" height="1"></rect><rect x="1" y="8" width="2" height="1"></rect><rect x="4" y="9" width="1" height="1"></rect><rect x="6" y="8" width="1" height="2"></rect><rect x="8" y="8" width="2" height="2"></rect><rect x="11" y="9" width="2" height="1"></rect><rect x="14" y="8" width="1" height="2"></rect><rect x="16" y="9" width="1" height="1"></rect><rect x="18" y="8" width="2" height="1"></rect><rect x="8" y="11" width="1" height="2"></rect><rect x="11" y="12" width="2" height="2"></rect><rect x="15" y="11" width="2" height="1"></rect><rect x="18" y="12" width="1" height="2"></rect><rect x="8" y="15" width="2" height="1"></rect><rect x="11" y="16" width="1" height="2"></rect><rect x="13" y="15" width="1" height="1"></rect><rect x="15" y="17" width="2" height="1"></rect><rect x="18" y="16" width="1" height="2"></rect><rect x="9" y="18" width="1" height="1"></rect><rect x="12" y="19" width="2" height="1"></rect><rect x="16" y="19" width="1" height="1"></rect></g></svg>
+                </div>
+                <div style="flex: 1 1 170px; min-width: 0; display: flex; flex-direction: column; gap: 8px;">
+                  <div style="font-size: 13px;">Scan this with Google Authenticator (or equivalent).</div>
+                  <div style="font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .5;">Or enter key manually</div>
+                  <code style="font-size: 12.5px; letter-spacing: .1em; padding: 7px 9px; background: var(--color-bg); border: 1px solid var(--color-divider); word-break: break-all;">K5ZQ · WX3T · MJ8R · P2VD</code>
+                </div>
+              </div>
+            </sc-if>
+
+            <div>
+              <div style="font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .6; margin-bottom: 8px;">6-digit code</div>
+              <div style="display: flex; gap: 8px;">
+                <sc-for list="{{ tt02Digits }}" as="d" hint-placeholder-count="6">
+                  <span style="{{ d.style }}">{{ d.ch }}</span>
+                </sc-for>
+              </div>
+              <sc-if value="{{ tt02Incorrect }}">
+                <div style="margin-top: 9px; font-size: 12.5px; color: var(--st-changes);">Incorrect code, please try again. 2 attempts remaining.</div>
+              </sc-if>
+            </div>
+
+            <sc-if value="{{ tt02Locked }}">
+              <div style="display: flex; gap: 9px; align-items: flex-start; padding: 11px 13px; background: var(--st-changes-bg); color: var(--st-changes); border-left: 2px solid var(--st-changes); font-size: 13px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                <span>Too many attempts. Try again in 15 minutes.</span>
+              </div>
+            </sc-if>
+
+            <button type="button" class="btn btn-primary" style="width: 100%; min-height: 44px; font-size: 14px;" disabled="{{ tt02VerifyDisabled }}">{{ tt02VerifyLabel }}</button>
+            <div style="font-size: 11.5px; opacity: .5; text-align: center;">Required on every login — no exceptions. §4.2</div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-03 MY TASKS ══ -->
+      <sc-if value="{{ isTT03 }}" hint-placeholder-val="{{ true }}">
+        <sc-if value="{{ tt03Loading }}">
+          <div style="display: flex; flex-direction: column; gap: 22px;">
+            <div class="sk" style="height: 34px; width: 260px;"></div>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+              <div class="sk" style="height: 86px;"></div><div class="sk" style="height: 86px;"></div><div class="sk" style="height: 86px;"></div><div class="sk" style="height: 86px;"></div>
+            </div>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              <div class="sk" style="height: 66px;"></div><div class="sk" style="height: 66px;"></div><div class="sk" style="height: 66px;"></div><div class="sk" style="height: 66px;"></div>
+            </div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ tt03Ready }}">
+          <div style="display: flex; flex-direction: column; gap: 22px;">
+            <div style="display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 12px;">
+              <div>
+                <h3 style="margin: 0; font-size: 26px;">{{ greeting }}</h3>
+                <div style="font-size: 13px; opacity: .6;">Friday, 4 September 2026</div>
+              </div>
+              <button type="button" class="btn btn-primary blueprint" onClick="{{ goCreate }}" style="min-height: 40px; border-radius: 0;">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"></path></svg>
+                Create Task
+              </button>
+            </div>
+
+            <sc-if value="{{ tt03Banner }}">
+              <div class="blueprint" style="padding: 15px 17px; border-left: 2px solid var(--st-changes); display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start;">
+                <i class="corner tr"></i><i class="corner br"></i>
+                <div style="flex: 1 1 300px; min-width: 0;">
+                  <div style="display: flex; align-items: center; gap: 8px; font-family: var(--font-heading); font-size: 15px; letter-spacing: .06em; text-transform: uppercase; color: var(--st-changes);">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 14l-4-4 4-4M5 10h9a5 5 0 015 5v4"></path></svg>
+                    1 task sent back for changes
+                  </div>
+                  <div style="font-size: 14px; margin-top: 5px;">TT-1047 · Update EOR contract template — Nigeria</div>
+                  <div style="font-size: 13px; opacity: .75; margin-top: 4px; font-style: italic; text-wrap: pretty;">“Please split this into the two entity variants and re-estimate — 2 days won't cover both.” — Thabo Molefe, 3 Sep</div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-secondary" onClick="{{ goDetail }}" style="border-radius: 0;">Open</button>
+                  <button type="button" class="btn btn-primary" style="border-radius: 0;">Resubmit</button>
+                </div>
+              </div>
+            </sc-if>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
+              <sc-for list="{{ tt03Stats }}" as="s" hint-placeholder-count="4">
+                <div class="blueprint" style="padding: 15px 16px; display: flex; flex-direction: column; gap: 4px;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .55; font-family: var(--font-heading);">{{ s.label }}</div>
+                  <div style="font-family: var(--font-heading); font-size: 38px; line-height: 1; color: {{ s.color }};">{{ s.value }}</div>
+                  <div style="font-size: 11.5px; opacity: .55;">{{ s.sub }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ tt03Empty }}">
+              <div class="blueprint" style="padding: 54px 26px; display: flex; flex-direction: column; align-items: center; gap: 14px; text-align: center;">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="1"></rect><path d="M8 10h8M8 14h5"></path></svg>
+                <div style="font-family: var(--font-heading); font-size: 21px; letter-spacing: .04em; text-transform: uppercase;">No tasks yet</div>
+                <div style="font-size: 13.5px; opacity: .65; max-width: 40ch;">Everything you're working on will live here. Create your first task to get started.</div>
+                <button type="button" class="btn btn-primary" onClick="{{ goCreate }}" style="border-radius: 0; min-height: 40px;">Create your first task</button>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tt03HasList }}">
+              <div style="display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 12px;">
+                  <h4 style="margin: 0; font-size: 17px; letter-spacing: .08em; text-transform: uppercase;">My Tasks</h4>
+                  <a href="#" onClick="{{ goList }}" style="font-size: 12px; letter-spacing: .1em; text-transform: uppercase;">Full list →</a>
+                </div>
+                <sc-for list="{{ tt03Tasks }}" as="t" hint-placeholder-count="4">
+                  <div class="blueprint" style="{{ t.rowStyle }}" style-hover="border-color:var(--color-accent)">
+                    <i class="corner tl"></i><i class="corner br"></i>
+                    <div style="flex: 1 1 260px; min-width: 0; display: flex; flex-direction: column; gap: 6px;">
+                      <div style="display: flex; align-items: center; gap: 9px; flex-wrap: wrap;">
+                        <span style="font-size: 10.5px; letter-spacing: .08em; opacity: .5; font-variant-numeric: tabular-nums;">{{ t.id }}</span>
+                        <a href="#" onClick="{{ t.open }}" style="font-size: 15.5px; color: var(--color-text);" style-hover="color:var(--color-accent)">{{ t.title }}</a>
+                      </div>
+                      <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+                        <span style="{{ t.approvalStyle }}">{{ t.approvalLabel }}</span>
+                        <span style="{{ t.workStyle }}">{{ t.workLabel }}</span>
+                        <span style="{{ t.dateStyle }}">{{ t.dateLabel }}</span>
+                      </div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 7px;">
+                      <span style="font-size: 10px; letter-spacing: .14em; text-transform: uppercase; opacity: .45;">Work status</span>
+                      <div class="seg" style="border-radius: 0;">
+                        <label class="seg-opt" style="padding: 5px 9px; font-size: 11.5px;"><input type="radio" name="{{ t.segName }}" checked="{{ t.isNotStarted }}"><span>Not started</span></label>
+                        <label class="seg-opt" style="padding: 5px 9px; font-size: 11.5px;"><input type="radio" name="{{ t.segName }}" checked="{{ t.isInProgress }}"><span>In progress</span></label>
+                        <label class="seg-opt" style="padding: 5px 9px; font-size: 11.5px;"><input type="radio" name="{{ t.segName }}" checked="{{ t.isDone }}"><span>Done</span></label>
+                      </div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ isAdmin }}">
+              <div class="blueprint" style="padding: 15px 17px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; background: color-mix(in srgb, var(--color-accent) 8%, transparent);">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div>
+                  <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-accent-700); font-family: var(--font-heading);">Admin · additive</div>
+                  <div style="font-family: var(--font-heading); font-size: 18px; letter-spacing: .04em;">Company Overview</div>
+                  <div style="font-size: 12.5px; opacity: .65;">7 overdue · 5 pending approval · 2 need changes</div>
+                </div>
+                <button type="button" class="btn btn-secondary" onClick="{{ goAdminHome }}" style="border-radius: 0;">Open overview →</button>
+              </div>
+            </sc-if>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ══ TT-04 TASK LIST ══ -->
+      <sc-if value="{{ isTT04 }}">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div class="blueprint" style="padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="field" style="flex: 2 1 210px; min-width: 0;">
+              <label>Search title</label>
+              <input class="input" style="border-radius: 0;" placeholder="e.g. payroll" value="{{ tt04Query }}">
+            </div>
+            <div class="field" style="flex: 1 1 140px;">
+              <label>Work status</label>
+              <select class="input" style="border-radius: 0;"><option>{{ tt04WorkFilter }}</option><option>Not started</option><option>In progress</option><option>Done</option></select>
+            </div>
+            <div class="field" style="flex: 1 1 140px;">
+              <label>Approval status</label>
+              <select class="input" style="border-radius: 0;"><option>{{ tt04ApprovalFilter }}</option><option>Pending approval</option><option>Needs changes</option><option>Approved</option></select>
+            </div>
+            <div class="field" style="flex: 1 1 150px;">
+              <label>Date range</label>
+              <input class="input" style="border-radius: 0;" value="{{ tt04DateFilter }}">
+            </div>
+            <sc-if value="{{ tt04Filtered }}">
+              <button type="button" class="btn btn-ghost" style="min-height: 36px;">Clear filters</button>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ tt04Loading }}">
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div class="sk" style="height: 38px;"></div><div class="sk" style="height: 44px;"></div><div class="sk" style="height: 44px;"></div><div class="sk" style="height: 44px;"></div><div class="sk" style="height: 44px;"></div><div class="sk" style="height: 44px;"></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tt04HasRows }}">
+            <div>
+              <div style="overflow-x: auto;">
+                <table class="table" style="width: 100%; min-width: 720px; border-collapse: collapse; font-size: 13.5px;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Task ↑</th>
+                      <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Approval</th>
+                      <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Work status</th>
+                      <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Due / duration ↕</th>
+                      <th style="text-align: right; padding: 9px 10px; white-space: nowrap;">Quick action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ tt04Rows }}" as="t" hint-placeholder-count="6">
+                      <tr>
+                        <td style="padding: 10px;">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 10.5px; opacity: .5; font-variant-numeric: tabular-nums;">{{ t.id }}</span>
+                            <a href="#" onClick="{{ t.open }}" style="color: var(--color-text);" style-hover="color:var(--color-accent)">{{ t.title }}</a>
+                          </div>
+                        </td>
+                        <td style="padding: 10px;"><span style="{{ t.approvalStyle }}">{{ t.approvalLabel }}</span></td>
+                        <td style="padding: 10px;"><span style="{{ t.workStyle }}">{{ t.workLabel }}</span></td>
+                        <td style="padding: 10px; white-space: nowrap;"><span style="{{ t.dateStyle }}">{{ t.dateLabel }}</span></td>
+                        <td style="padding: 10px; text-align: right;">
+                          <select class="input" style="border-radius: 0; width: auto; min-width: 128px; font-size: 12.5px;"><option>{{ t.workLabel }}</option><option>Not started</option><option>In progress</option><option>Done</option></select>
+                        </td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; font-size: 12.5px;">
+                <span style="opacity: .6;">{{ tt04Count }}</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="opacity: .6;">Per page</span>
+                  <select class="input" style="border-radius: 0; width: auto; font-size: 12.5px;"><option>25</option><option>50</option></select>
+                  <button type="button" class="btn btn-secondary" style="border-radius: 0; min-height: 32px;" disabled="{{ true }}">←</button>
+                  <span style="padding: 0 4px;">1 / 1</span>
+                  <button type="button" class="btn btn-secondary" style="border-radius: 0; min-height: 32px;" disabled="{{ true }}">→</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tt04Empty }}">
+            <div class="blueprint" style="padding: 48px 26px; display: flex; flex-direction: column; align-items: center; gap: 13px; text-align: center;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5"><circle cx="11" cy="11" r="7"></circle><path d="M16 16l4 4"></path></svg>
+              <div style="font-family: var(--font-heading); font-size: 19px; letter-spacing: .04em; text-transform: uppercase;">No tasks match these filters</div>
+              <button type="button" class="btn btn-secondary" style="border-radius: 0;">Clear all filters</button>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-05 CREATE TASK ══ -->
+      <sc-if value="{{ isTT05 }}">
+        <div style="display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start;">
+          <div class="blueprint" style="flex: 2 1 380px; min-width: 0; padding: 22px 22px 24px; display: flex; flex-direction: column; gap: 16px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+            <sc-if value="{{ tt05Success }}">
+              <div style="display: flex; gap: 9px; align-items: flex-start; padding: 11px 13px; background: var(--st-approved-bg); color: var(--st-approved); border-left: 2px solid var(--st-approved); font-size: 13px;">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none;margin-top:2px"><path d="M20 6L9 17l-5-5"></path></svg>
+                <span>{{ tt05SuccessMsg }}</span>
+              </div>
+            </sc-if>
+
+            <div class="field">
+              <label>Task title *</label>
+              <input class="input" style="{{ tt05TitleStyle }}" value="{{ tt05Title }}" placeholder="Short, specific — what needs doing">
+              <sc-if value="{{ tt05Invalid }}">
+                <div style="font-size: 12px; color: var(--st-changes); margin-top: 5px;">A title is required.</div>
+              </sc-if>
+            </div>
+
+            <div class="field">
+              <label>Description (optional)</label>
+              <textarea class="input" style="border-radius: 0; min-height: 96px;" placeholder="Plain text. Context, links, anything the reviewer needs." value="{{ tt05Desc }}"></textarea>
+            </div>
+
+            <div class="field">
+              <label>Assignee</label>
+              <sc-if value="{{ isStaff }}">
+                <div style="display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid var(--color-divider); background: color-mix(in srgb, var(--color-text) 4%, transparent);">
+                  <span style="width: 26px; height: 26px; flex: none; border: 1px solid var(--color-divider); display: grid; place-items: center; font-size: 11px;">AO</span>
+                  <span style="font-size: 14px;">Amara Okafor (you)</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="margin-left:auto;opacity:.5"><rect x="4" y="10" width="16" height="11" rx="1"></rect><path d="M8 10V7a4 4 0 018 0v3"></path></svg>
+                </div>
+                <div style="font-size: 12px; opacity: .6; margin-top: 5px;">Staff can only create tasks for themselves.</div>
+              </sc-if>
+              <sc-if value="{{ isAdmin }}">
+                <select class="input" style="border-radius: 0;"><option>Chiamaka Eze — Payroll, Lagos</option><option>Amara Okafor — Compliance, Nairobi</option><option>Joseph Mwangi — Payroll, Nairobi</option><option>Fatima Diallo — Onboarding, Dakar</option><option>Lindiwe Ndlovu — Compliance, Johannesburg</option><option>Kwame Mensah — Onboarding, Accra</option></select>
+                <div style="display: flex; gap: 9px; align-items: flex-start; margin-top: 9px; padding: 10px 12px; background: var(--st-progress-bg); color: var(--st-progress); border-left: 2px solid var(--color-accent); font-size: 12.5px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+                  <span>Assigned tasks you create are approved automatically — the assignee will never see a pending state, and the due date is set the moment you save.</span>
+                </div>
+              </sc-if>
+            </div>
+
+            <div class="field">
+              <label>Requested duration *</label>
+              <div style="display: flex; gap: 8px; align-items: flex-start;">
+                <input class="input" style="{{ tt05DurStyle }}" value="{{ tt05Dur }}" placeholder="2">
+                <div class="seg" style="border-radius: 0;">
+                  <label class="seg-opt"><input type="radio" name="itm-dur" checked="{{ true }}"><span>Days</span></label>
+                  <label class="seg-opt"><input type="radio" name="itm-dur"><span>Weeks</span></label>
+                </div>
+              </div>
+              <sc-if value="{{ tt05Invalid }}">
+                <div style="font-size: 12px; color: var(--st-changes); margin-top: 5px;">Enter a duration.</div>
+              </sc-if>
+              <div style="font-size: 12px; opacity: .6; margin-top: 6px; text-wrap: pretty;">{{ tt05DurHelper }}</div>
+            </div>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 9px; align-items: center; padding-top: 4px;">
+              <button type="button" class="btn btn-primary" style="border-radius: 0; min-height: 42px;" disabled="{{ tt05Submitting }}">{{ tt05SubmitLabel }}</button>
+              <button type="button" class="btn btn-secondary" style="border-radius: 0; min-height: 42px;">Cancel</button>
+              <sc-if value="{{ tt05Submitting }}">
+                <span class="sk" style="width: 70px; height: 3px;"></span>
+              </sc-if>
+            </div>
+          </div>
+
+          <div style="flex: 1 1 250px; min-width: 0; display: flex; flex-direction: column; gap: 14px;">
+            <div class="blueprint" style="padding: 16px; display: flex; flex-direction: column; gap: 9px;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-accent-700); font-family: var(--font-heading);">What happens next</div>
+              <div style="font-size: 13px; opacity: .78; text-wrap: pretty;">{{ tt05NextCopy }}</div>
+            </div>
+            <sc-if value="{{ tt05Discard }}">
+              <div class="blueprint" style="padding: 16px; display: flex; flex-direction: column; gap: 11px; border-left: 2px solid var(--st-pending);">
+                <i class="corner tr"></i><i class="corner br"></i>
+                <div style="font-family: var(--font-heading); font-size: 16px; letter-spacing: .04em; text-transform: uppercase;">Discard changes?</div>
+                <div style="font-size: 13px; opacity: .75;">You've started this task but haven't submitted it. Leaving now discards it.</div>
+                <div style="display: flex; gap: 8px;">
+                  <button type="button" class="btn btn-secondary" style="border-radius: 0;">Keep editing</button>
+                  <button type="button" class="btn btn-ghost">Discard</button>
+                </div>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-06 TASK DETAIL ══ -->
+      <sc-if value="{{ isTT06 }}">
+        <div style="display: flex; flex-wrap: wrap; gap: 22px; align-items: flex-start;">
+          <div style="flex: 2 1 400px; min-width: 0; display: flex; flex-direction: column; gap: 18px;">
+
+            <div class="blueprint" style="padding: 20px 22px; display: flex; flex-direction: column; gap: 14px;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-start; justify-content: space-between;">
+                <div style="min-width: 0;">
+                  <div style="font-size: 10.5px; letter-spacing: .12em; opacity: .5; font-variant-numeric: tabular-nums;">{{ tt06Id }}</div>
+                  <h3 style="margin: 3px 0 0; font-size: 26px; text-wrap: pretty;">{{ tt06Title }}</h3>
+                </div>
+                <sc-if value="{{ tt06CanEdit }}">
+                  <button type="button" class="btn btn-secondary" style="border-radius: 0;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 20h4l10-10-4-4L4 16v4z"></path></svg>
+                    Edit
+                  </button>
+                </sc-if>
+              </div>
+              <p style="margin: 0; font-size: 14px; opacity: .8; text-wrap: pretty; max-width: 68ch;">{{ tt06Desc }}</p>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1px; background: var(--color-divider); border: 1px solid var(--color-divider);">
+                <div style="background: var(--color-bg); padding: 12px 14px; display: flex; flex-direction: column; gap: 7px;">
+                  <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .55; font-family: var(--font-heading);">Approval status</div>
+                  <span style="{{ tt06ApprovalStyle }}">{{ tt06ApprovalLabel }}</span>
+                  <div style="font-size: 11.5px; opacity: .55;">{{ tt06ApprovalMeta }}</div>
+                </div>
+                <div style="background: var(--color-bg); padding: 12px 14px; display: flex; flex-direction: column; gap: 7px;">
+                  <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .55; font-family: var(--font-heading);">Work status</div>
+                  <div class="seg" style="border-radius: 0; align-self: flex-start;">
+                    <label class="seg-opt" style="padding: 5px 9px; font-size: 11.5px;"><input type="radio" name="itm-d-work" checked="{{ tt06IsNotStarted }}"><span>Not started</span></label>
+                    <label class="seg-opt" style="padding: 5px 9px; font-size: 11.5px;"><input type="radio" name="itm-d-work" checked="{{ tt06IsInProgress }}"><span>In progress</span></label>
+                    <label class="seg-opt" style="padding: 5px 9px; font-size: 11.5px;"><input type="radio" name="itm-d-work" checked="{{ tt06IsDone }}"><span>Done</span></label>
+                  </div>
+                  <div style="font-size: 11.5px; opacity: .55;">Editable regardless of approval.</div>
+                </div>
+                <div style="background: var(--color-bg); padding: 12px 14px; display: flex; flex-direction: column; gap: 7px;">
+                  <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .55; font-family: var(--font-heading);">{{ tt06DateLabelTitle }}</div>
+                  <div style="font-family: var(--font-heading); font-size: 19px; letter-spacing: .02em; color: {{ tt06DateColor }};">{{ tt06DateValue }}</div>
+                  <div style="font-size: 11.5px; opacity: .55;">{{ tt06DateMeta }}</div>
+                </div>
+              </div>
+
+              <sc-if value="{{ tt06Overdue }}">
+                <div style="display: flex; gap: 9px; align-items: center; padding: 9px 12px; border: 1px solid var(--st-over); color: var(--st-over); font-size: 13px;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>
+                  <span>Overdue by 2 days. Visible here and on dashboards only — a weekly email starts at day 7.</span>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ tt06Changes }}">
+                <div style="padding: 14px 16px; background: var(--st-changes-bg); border-left: 2px solid var(--st-changes); display: flex; flex-direction: column; gap: 8px;">
+                  <div style="font-family: var(--font-heading); font-size: 14px; letter-spacing: .1em; text-transform: uppercase; color: var(--st-changes);">Sent back — note from Admin</div>
+                  <div style="font-size: 14px; text-wrap: pretty;">“Please split this into the two entity variants and re-estimate — 2 days won't cover both.”</div>
+                  <div style="font-size: 11.5px; opacity: .6;">Thabo Molefe · 3 Sep 2026, 14:02</div>
+                  <sc-if value="{{ isStaff }}">
+                    <button type="button" class="btn btn-primary" style="border-radius: 0; align-self: flex-start; margin-top: 4px;">Resubmit for approval</button>
+                  </sc-if>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ isAdmin }}">
+                <div style="display: flex; flex-wrap: wrap; gap: 9px; align-items: center; padding-top: 4px; border-top: 1px solid var(--color-divider);">
+                  <span style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .5; font-family: var(--font-heading); margin-right: 4px;">Admin actions</span>
+                  <button type="button" class="btn btn-primary" onClick="{{ openPanel }}" style="border-radius: 0;" disabled="{{ tt06AdminDisabled }}">Approve…</button>
+                  <button type="button" class="btn btn-secondary" onClick="{{ openPanel }}" style="border-radius: 0;" disabled="{{ tt06AdminDisabled }}">Send back…</button>
+                  <button type="button" class="btn btn-secondary" style="border-radius: 0;">Reassign</button>
+                  <button type="button" class="btn btn-ghost" style="margin-left: auto; color: var(--st-changes);">Delete task</button>
+                </div>
+              </sc-if>
+              <sc-if value="{{ tt06StaffDelete }}">
+                <div style="padding-top: 4px; border-top: 1px solid var(--color-divider);">
+                  <button type="button" class="btn btn-ghost" style="color: var(--st-changes);">Delete task</button>
+                  <span style="font-size: 11.5px; opacity: .55; margin-left: 6px;">Available to you until it's approved.</span>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+
+          <div class="blueprint" style="flex: 1 1 270px; min-width: 0; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+              <h4 style="margin: 0; font-size: 16px; letter-spacing: .08em; text-transform: uppercase;">History</h4>
+              <span style="font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .5;">Append-only</span>
+            </div>
+            <div style="display: flex; flex-direction: column;">
+              <sc-for list="{{ tt06History }}" as="h" hint-placeholder-count="4">
+                <div style="display: flex; gap: 12px; padding-bottom: 16px;">
+                  <div style="display: flex; flex-direction: column; align-items: center; flex: none; width: 12px;">
+                    <span style="width: 7px; height: 7px; background: {{ h.color }}; margin-top: 6px; flex: none;"></span>
+                    <span style="width: 1px; flex: 1; background: var(--color-divider); margin-top: 4px;"></span>
+                  </div>
+                  <div style="min-width: 0;">
+                    <div style="font-size: 12px; letter-spacing: .12em; text-transform: uppercase; font-family: var(--font-heading); color: {{ h.color }};">{{ h.event }}</div>
+                    <div style="font-size: 13px; opacity: .85; text-wrap: pretty;">{{ h.detail }}</div>
+                    <div style="font-size: 11px; opacity: .5; font-variant-numeric: tabular-nums;">{{ h.who }} · {{ h.when }}</div>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-07 ADMIN OVERVIEW ══ -->
+      <sc-if value="{{ isTT07 }}">
+        <sc-if value="{{ tt07Loading }}">
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px;">
+              <div class="sk" style="height: 100px;"></div><div class="sk" style="height: 100px;"></div><div class="sk" style="height: 100px;"></div>
+            </div>
+            <div class="sk" style="height: 230px;"></div>
+          </div>
+        </sc-if>
+        <sc-if value="{{ tt07Ready }}">
+          <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px;">
+              <sc-for list="{{ tt07Stats }}" as="s" hint-placeholder-count="3">
+                <div class="blueprint" style="padding: 17px 18px; display: flex; flex-direction: column; gap: 5px;">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; opacity: .55; font-family: var(--font-heading);">{{ s.label }}</div>
+                  <div style="font-family: var(--font-heading); font-size: 44px; line-height: 1; color: {{ s.color }};">{{ s.value }}</div>
+                  <div style="font-size: 12px; opacity: .6; text-wrap: pretty;">{{ s.sub }}</div>
+                </div>
+              </sc-for>
+            </div>
+
+            <sc-if value="{{ tt07HighOverdue }}">
+              <div class="blueprint" style="padding: 15px 17px; border-left: 2px solid var(--st-over); display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between;">
+                <i class="corner tr"></i><i class="corner br"></i>
+                <div style="min-width: 0;">
+                  <div style="font-family: var(--font-heading); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--st-over);">18 tasks overdue</div>
+                  <div style="font-size: 13px; opacity: .75; text-wrap: pretty;">Concentrated in Payroll (11) and Onboarding (5). Nothing has been pushed to anyone — this is here when you choose to look.</div>
+                </div>
+                <button type="button" class="btn btn-secondary" onClick="{{ goList }}" style="border-radius: 0;">View overdue →</button>
+              </div>
+            </sc-if>
+
+            <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: flex-start;">
+              <div class="blueprint" style="flex: 2 1 340px; min-width: 0; padding: 18px 20px; display: flex; flex-direction: column; gap: 14px;">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div style="display: flex; align-items: baseline; justify-content: space-between; gap: 10px;">
+                  <h4 style="margin: 0; font-size: 16px; letter-spacing: .08em; text-transform: uppercase;">Open workload per person</h4>
+                  <span style="font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; opacity: .5;">Not started + in progress</span>
+                </div>
+                <sc-if value="{{ tt07Zero }}">
+                  <div style="font-size: 13.5px; opacity: .6; padding: 22px 0;">No open tasks anywhere. Nothing to balance.</div>
+                </sc-if>
+                <sc-if value="{{ tt07HasWorkload }}">
+                  <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <sc-for list="{{ tt07Workload }}" as="w" hint-placeholder-count="6">
+                      <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="flex: 0 0 122px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ w.name }}</span>
+                        <span style="flex: 1; height: 14px; background: color-mix(in srgb, var(--color-text) 7%, transparent); position: relative; min-width: 40px;">
+                          <span style="position: absolute; inset: 0 auto 0 0; width: {{ w.pct }}; background: var(--color-accent);"></span>
+                        </span>
+                        <span style="flex: none; font-family: var(--font-heading); font-size: 16px; width: 26px; text-align: right; font-variant-numeric: tabular-nums;">{{ w.count }}</span>
+                        <span style="{{ w.overdueStyle }}">{{ w.overdueLabel }}</span>
+                      </div>
+                    </sc-for>
+                  </div>
+                </sc-if>
+              </div>
+
+              <div style="flex: 1 1 230px; min-width: 0; display: flex; flex-direction: column; gap: 12px;">
+                <button type="button" class="blueprint" onClick="{{ goApprovals }}" style="text-align: left; background: none; color: inherit; font: inherit; cursor: pointer; padding: 15px 16px; display: flex; flex-direction: column; gap: 4px;" style-hover="border-color:var(--color-accent)">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <span style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-accent-700); font-family: var(--font-heading);">Go to</span>
+                  <span style="font-family: var(--font-heading); font-size: 19px; letter-spacing: .04em;">Approval Queue</span>
+                  <span style="font-size: 12.5px; opacity: .65;">{{ tt07QueueSub }}</span>
+                </button>
+                <button type="button" class="blueprint" onClick="{{ goUsers }}" style="text-align: left; background: none; color: inherit; font: inherit; cursor: pointer; padding: 15px 16px; display: flex; flex-direction: column; gap: 4px;" style-hover="border-color:var(--color-accent)">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <span style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-accent-700); font-family: var(--font-heading);">Go to</span>
+                  <span style="font-family: var(--font-heading); font-size: 19px; letter-spacing: .04em;">User Management</span>
+                  <span style="font-size: 12.5px; opacity: .65;">14 active · 2 admins</span>
+                </button>
+                <div style="font-size: 11.5px; opacity: .55; text-wrap: pretty; padding: 0 2px;">The only thing that reaches your inbox is the weekly overdue email. Everything else lives on this screen.</div>
+              </div>
+            </div>
+          </div>
+        </sc-if>
+      </sc-if>
+
+      <!-- ══ TT-08 APPROVAL QUEUE ══ -->
+      <sc-if value="{{ isTT08 }}">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center; border-bottom: 1px solid var(--color-divider);">
+            <sc-for list="{{ tt08Tabs }}" as="tb" hint-placeholder-count="2">
+              <button type="button" onClick="{{ tb.pick }}" style="{{ tb.style }}">{{ tb.label }}</button>
+            </sc-for>
+          </div>
+
+          <sc-if value="{{ tt08Loading }}">
+            <div style="display: flex; flex-direction: column; gap: 7px;">
+              <div class="sk" style="height: 38px;"></div><div class="sk" style="height: 44px;"></div><div class="sk" style="height: 44px;"></div><div class="sk" style="height: 44px;"></div><div class="sk" style="height: 44px;"></div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tt08HasRows }}">
+            <div style="overflow-x: auto;">
+              <table class="table" style="width: 100%; min-width: 760px; border-collapse: collapse; font-size: 13.5px;">
+                <thead>
+                  <tr>
+                    <th style="text-align: left; padding: 9px 10px;">Task</th>
+                    <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Assignee</th>
+                    <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Requested</th>
+                    <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Submitted</th>
+                    <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Approval</th>
+                    <th style="text-align: right; padding: 9px 10px;"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <sc-for list="{{ tt08Rows }}" as="r" hint-placeholder-count="5">
+                    <tr>
+                      <td style="padding: 9px 10px;">
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                          <span style="font-size: 10.5px; opacity: .5; font-variant-numeric: tabular-nums;">{{ r.id }}</span>
+                          <a href="#" onClick="{{ openPanel }}" style="color: var(--color-text);" style-hover="color:var(--color-accent)">{{ r.title }}</a>
+                        </div>
+                      </td>
+                      <td style="padding: 9px 10px; white-space: nowrap;">{{ r.assignee }}</td>
+                      <td style="padding: 9px 10px; white-space: nowrap;">{{ r.duration }}</td>
+                      <td style="padding: 9px 10px; white-space: nowrap; font-variant-numeric: tabular-nums;">{{ r.submitted }}</td>
+                      <td style="padding: 9px 10px;"><span style="{{ r.approvalStyle }}">{{ r.approvalLabel }}</span></td>
+                      <td style="padding: 9px 10px; text-align: right; white-space: nowrap;">
+                        <button type="button" class="btn btn-secondary" onClick="{{ openPanel }}" style="border-radius: 0; min-height: 30px; font-size: 12px;">Review</button>
+                      </td>
+                    </tr>
+                  </sc-for>
+                </tbody>
+              </table>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tt08Empty }}">
+            <div class="blueprint" style="padding: 52px 26px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5"><path d="M20 6L9 17l-5-5"></path></svg>
+              <div style="font-family: var(--font-heading); font-size: 20px; letter-spacing: .04em; text-transform: uppercase;">Nothing waiting on you right now</div>
+              <div style="font-size: 13px; opacity: .6;">Both tabs are clear.</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-09 APPROVE / SEND BACK PANEL ══ -->
+      <sc-if value="{{ isTT09 }}">
+        <div style="position: relative; min-height: 520px; border: 1px dashed var(--color-divider); padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="font-size: 11px; letter-spacing: .14em; text-transform: uppercase; opacity: .45;">Overlay context — Approval Queue behind</div>
+          <div style="display: flex; flex-direction: column; gap: 6px; opacity: .3; pointer-events: none;">
+            <div class="sk" style="height: 34px; animation: none;"></div>
+            <div class="sk" style="height: 40px; animation: none;"></div>
+            <div class="sk" style="height: 40px; animation: none;"></div>
+            <div class="sk" style="height: 40px; animation: none;"></div>
+          </div>
+          <div style="position: absolute; inset: 0; background: color-mix(in srgb, var(--color-accent-900) 55%, transparent); display: grid; place-items: center; padding: 20px;">
+            <div class="blueprint" style="width: 100%; max-width: 520px; background: var(--color-bg); box-shadow: var(--shadow-lg); padding: 22px 24px; display: flex; flex-direction: column; gap: 16px; max-height: 100%; overflow: auto;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+              <sc-if value="{{ tt09Decided }}">
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; padding: 26px 0;">
+                  <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="{{ tt09DecidedColor }}" stroke-width="1.5"><circle cx="12" cy="12" r="9"></circle><path d="M8 12l3 3 5-6"></path></svg>
+                  <div style="font-family: var(--font-heading); font-size: 22px; letter-spacing: .04em; text-transform: uppercase; color: {{ tt09DecidedColor }};">{{ tt09DecidedTitle }}</div>
+                  <div style="font-size: 13.5px; opacity: .75; max-width: 42ch; text-wrap: pretty;">{{ tt09DecidedCopy }}</div>
+                  <button type="button" class="btn btn-secondary" onClick="{{ goApprovals }}" style="border-radius: 0;">Back to queue</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ tt09Reviewing }}">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;">
+                    <div style="min-width: 0;">
+                      <div style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-accent-700); font-family: var(--font-heading);">Review · TT-1051</div>
+                      <h4 style="margin: 3px 0 0; font-size: 21px; text-wrap: pretty;">Onboard 6 hires — Ghana entity</h4>
+                    </div>
+                    <button type="button" class="btn btn-ghost btn-icon" onClick="{{ goApprovals }}" aria-label="Close">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+                    </button>
+                  </div>
+
+                  <p style="margin: 0; font-size: 13.5px; opacity: .8; text-wrap: pretty;">Contracts, statutory registrations and payroll setup for six hires starting 15 Sep. Two are on fixed-term contracts.</p>
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; padding: 11px 0; border-top: 1px solid var(--color-divider); border-bottom: 1px solid var(--color-divider);">
+                    <div><span style="opacity: .55;">Assignee</span><br><span style="font-size: 14px;">Kwame Mensah</span></div>
+                    <div><span style="opacity: .55;">Requested</span><br><span style="font-size: 14px;">3 days</span></div>
+                    <div><span style="opacity: .55;">Submitted</span><br><span style="font-size: 14px;">3 Sep 2026</span></div>
+                  </div>
+
+                  <sc-if value="{{ tt09InProgressNote }}">
+                    <div style="display: flex; gap: 9px; align-items: flex-start; padding: 10px 12px; background: var(--st-idle-bg); color: var(--st-idle); font-size: 12.5px;">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 11v5M12 8h.01"></path></svg>
+                      <span>Kwame already marked this In Progress. That's expected — work status runs independently of approval.</span>
+                    </div>
+                  </sc-if>
+
+                  <div class="field">
+                    <label>Duration — adjust if needed</label>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center;">
+                      <input class="input" style="border-radius: 0; width: 78px;" value="{{ tt09DurValue }}">
+                      <div class="seg" style="border-radius: 0;">
+                        <label class="seg-opt"><input type="radio" name="itm-p-unit" checked="{{ true }}"><span>Days</span></label>
+                        <label class="seg-opt"><input type="radio" name="itm-p-unit"><span>Weeks</span></label>
+                      </div>
+                      <button type="button" class="btn btn-ghost" onClick="{{ tt09Adjust }}" style="font-size: 12px;">{{ tt09AdjustLabel }}</button>
+                    </div>
+                    <div style="margin-top: 10px; padding: 11px 13px; border: 1px solid var(--color-accent); display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px;">
+                      <span style="font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--color-accent-700); font-family: var(--font-heading);">Due date if approved now</span>
+                      <span style="font-family: var(--font-heading); font-size: 21px; letter-spacing: .02em;">{{ tt09DuePreview }}</span>
+                      <span style="font-size: 11.5px; opacity: .55;">approved_at + {{ tt09DurLabel }}</span>
+                    </div>
+                  </div>
+
+                  <div class="field">
+                    <label>Send-back note {{ tt09NoteReqLabel }}</label>
+                    <textarea class="input" style="{{ tt09NoteStyle }}" placeholder="What needs fixing before this can be approved?" value="{{ tt09NoteValue }}"></textarea>
+                    <sc-if value="{{ tt09NoteError }}">
+                      <div style="font-size: 12px; color: var(--st-changes); margin-top: 5px;">A note is required before a task can be sent back.</div>
+                    </sc-if>
+                  </div>
+
+                  <div style="display: flex; flex-wrap: wrap; gap: 9px; align-items: center;">
+                    <button type="button" class="btn btn-primary" onClick="{{ tt09Approve }}" style="border-radius: 0; min-height: 42px;">Approve · due {{ tt09DuePreview }}</button>
+                    <button type="button" class="btn btn-secondary" onClick="{{ tt09SendBack }}" style="border-radius: 0; min-height: 42px;" disabled="{{ tt09SendBackDisabled }}">Send back</button>
+                    <button type="button" class="btn btn-ghost" onClick="{{ goApprovals }}" style="margin-left: auto;">Cancel</button>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-10 USER MANAGEMENT ══ -->
+      <sc-if value="{{ isTT10 }}">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+            <div class="field" style="flex: 2 1 220px; min-width: 0;">
+              <label>Search name or email</label>
+              <input class="input" style="border-radius: 0;" value="{{ tt10Query }}" placeholder="e.g. Chiamaka">
+            </div>
+            <div class="field" style="flex: 1 1 140px;">
+              <label>Role</label>
+              <select class="input" style="border-radius: 0;"><option>All roles</option><option>Admin</option><option>Staff</option></select>
+            </div>
+            <span style="font-size: 12.5px; opacity: .6; padding-bottom: 9px;">{{ tt10Count }}</span>
+          </div>
+
+          <sc-if value="{{ tt10Blocked }}">
+            <div class="blueprint" style="padding: 15px 17px; border-left: 2px solid var(--st-changes); display: flex; gap: 11px; align-items: flex-start;">
+              <i class="corner tr"></i><i class="corner br"></i>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="var(--st-changes)" stroke-width="1.5" style="flex:none;margin-top:2px"><circle cx="12" cy="12" r="9"></circle><path d="M12 8v4M12 16h.01"></path></svg>
+              <div>
+                <div style="font-family: var(--font-heading); font-size: 16px; letter-spacing: .06em; text-transform: uppercase; color: var(--st-changes);">Can't demote the last Admin</div>
+                <div style="font-size: 13.5px; opacity: .8; text-wrap: pretty; max-width: 62ch;">Thabo Molefe is the only active Admin. Promote someone else to Admin first, then demote this account — the system will never leave zero active Admins.</div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tt10Deactivated }}">
+            <div style="display: flex; gap: 9px; align-items: center; padding: 10px 13px; background: var(--st-approved-bg); color: var(--st-approved); border-left: 2px solid var(--st-approved); font-size: 13px;">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex:none"><path d="M20 6L9 17l-5-5"></path></svg>
+              <span>Grace Achieng deactivated. Her account stays visible below, greyed out, with her task history intact.</span>
+            </div>
+          </sc-if>
+
+          <div style="overflow-x: auto;">
+            <table class="table" style="width: 100%; min-width: 780px; border-collapse: collapse; font-size: 13.5px;">
+              <thead>
+                <tr>
+                  <th style="text-align: left; padding: 9px 10px;">Name</th>
+                  <th style="text-align: left; padding: 9px 10px;">Email</th>
+                  <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Role</th>
+                  <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">2FA</th>
+                  <th style="text-align: left; padding: 9px 10px; white-space: nowrap;">Account</th>
+                  <th style="text-align: right; padding: 9px 10px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <sc-for list="{{ tt10Users }}" as="u" hint-placeholder-count="7">
+                  <tr style="{{ u.rowStyle }}">
+                    <td style="padding: 9px 10px; white-space: nowrap;">{{ u.name }}</td>
+                    <td style="padding: 9px 10px; opacity: .7;">{{ u.email }}</td>
+                    <td style="padding: 9px 10px;"><span style="{{ u.roleStyle }}">{{ u.role }}</span></td>
+                    <td style="padding: 9px 10px; white-space: nowrap;"><span style="{{ u.mfaStyle }}">{{ u.mfa }}</span></td>
+                    <td style="padding: 9px 10px; white-space: nowrap;"><span style="{{ u.activeStyle }}">{{ u.active }}</span></td>
+                    <td style="padding: 9px 10px; text-align: right; white-space: nowrap;">
+                      <div style="display: inline-flex; gap: 6px;">
+                        <button type="button" class="btn btn-secondary" onClick="{{ u.roleAction }}" style="border-radius: 0; min-height: 30px; font-size: 12px;" disabled="{{ u.disabled }}">{{ u.roleActionLabel }}</button>
+                        <button type="button" class="btn btn-ghost" onClick="{{ u.deactivate }}" style="font-size: 12px;" disabled="{{ u.disabled }}">{{ u.activeActionLabel }}</button>
+                      </div>
+                    </td>
+                  </tr>
+                </sc-for>
+              </tbody>
+            </table>
+          </div>
+          <div style="font-size: 11.5px; opacity: .55; text-wrap: pretty;">Every role change and deactivation is confirmed in a dialog first. The initial Admin is set in environment configuration, not here. §4.8</div>
+        </div>
+      </sc-if>
+
+      <!-- ══ TT-11 LOGIN AUDIT ══ -->
+      <sc-if value="{{ isTT11 }}">
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;">
+            <div class="field" style="flex: 1 1 190px; min-width: 0;">
+              <label>User or email</label>
+              <input class="input" style="border-radius: 0;" value="{{ tt11Query }}" placeholder="Any user">
+            </div>
+            <div class="field" style="flex: 1 1 140px;">
+              <label>Outcome</label>
+              <select class="input" style="border-radius: 0;"><option>{{ tt11Outcome }}</option><option>Success</option><option>Failure</option></select>
+            </div>
+            <div class="field" style="flex: 1 1 170px;">
+              <label>Date range</label>
+              <input class="input" style="border-radius: 0;" value="{{ tt11Range }}">
+            </div>
+            <span style="font-size: 12.5px; opacity: .6; padding-bottom: 9px;">{{ tt11Count }}</span>
+          </div>
+
+          <sc-if value="{{ tt11HasRows }}">
+            <div>
+              <div style="overflow-x: auto;">
+                <table class="table" style="width: 100%; min-width: 820px; border-collapse: collapse; font-size: 13px;">
+                  <thead>
+                    <tr>
+                      <th style="text-align: left; padding: 8px 10px; white-space: nowrap;">Timestamp</th>
+                      <th style="text-align: left; padding: 8px 10px;">Account attempted</th>
+                      <th style="text-align: left; padding: 8px 10px; white-space: nowrap;">IP address</th>
+                      <th style="text-align: left; padding: 8px 10px; white-space: nowrap;">Result</th>
+                      <th style="text-align: left; padding: 8px 10px; white-space: nowrap;">MFA</th>
+                      <th style="text-align: left; padding: 8px 10px; white-space: nowrap;">Fingerprint</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <sc-for list="{{ tt11Rows }}" as="r" hint-placeholder-count="8">
+                      <tr>
+                        <td style="padding: 8px 10px; white-space: nowrap; font-variant-numeric: tabular-nums;">{{ r.ts }}</td>
+                        <td style="padding: 8px 10px;">{{ r.email }}</td>
+                        <td style="padding: 8px 10px; white-space: nowrap; font-variant-numeric: tabular-nums; opacity: .75;">{{ r.ip }}</td>
+                        <td style="padding: 8px 10px;"><span style="{{ r.resultStyle }}">{{ r.result }}</span></td>
+                        <td style="padding: 8px 10px; white-space: nowrap;"><span style="{{ r.mfaStyle }}">{{ r.mfa }}</span></td>
+                        <td style="padding: 8px 10px; white-space: nowrap;"><span style="{{ r.fpStyle }}">{{ r.fp }}</span></td>
+                      </tr>
+                    </sc-for>
+                  </tbody>
+                </table>
+              </div>
+              <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 14px; font-size: 12.5px;">
+                <span style="opacity: .6;">Read-only. Retained for security review.</span>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button type="button" class="btn btn-secondary" style="border-radius: 0; min-height: 32px;" disabled="{{ true }}">←</button>
+                  <span>1 / 24</span>
+                  <button type="button" class="btn btn-secondary" style="border-radius: 0; min-height: 32px;">→</button>
+                </div>
+              </div>
+            </div>
+          </sc-if>
+
+          <sc-if value="{{ tt11Empty }}">
+            <div class="blueprint" style="padding: 48px 26px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div style="font-family: var(--font-heading); font-size: 19px; letter-spacing: .04em; text-transform: uppercase;">No login attempts recorded yet</div>
+            </div>
+          </sc-if>
+        </div>
+      </sc-if>
+
+    </main>
+  </div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900}}">
+const SCREENS = {
+  'TT-01': { title: 'Login Page', route: '/login', app: 'both', group: 'Pre-session',
+    note: 'Single entry point — Google OAuth 2.0 only. §4.1',
+    states: [['idle','Idle'],['redirecting','Redirecting'],['error','Sign-in failed']] },
+  'TT-02': { title: 'Two-Factor Verification', route: '/verify-2fa', app: 'both', group: 'Pre-session',
+    note: 'A hard, unskippable gate on every login. §4.1 §4.2 §4.5 §4.6',
+    states: [['enroll','First-time enrollment'],['entry','Returning user'],['verifying','Verifying'],['incorrect','Incorrect code'],['locked','Locked out'],['stepup','Step-up · new device']] },
+  'TT-03': { title: 'My Tasks', route: '/', app: 'both', group: 'My work',
+    note: 'The personal landing page — everything you are working on, both status tracks at a glance.',
+    states: [['loaded','Loaded'],['empty','Empty'],['overdue','Has overdue'],['changes','Needs-changes banner'],['loading','Loading skeleton']] },
+  'TT-04': { title: 'Task List', route: '/tasks', app: 'both', group: 'My work',
+    note: 'A working list for scanning and triaging your own tasks. §14.4',
+    states: [['loaded','Loaded'],['filtered','Filtered'],['empty','No matches'],['loading','Loading skeleton']] },
+  'TT-05': { title: 'Create Task', route: '/tasks/new', app: 'both', group: 'My work',
+    note: 'Staff create for themselves (pending approval); Admin assign to anyone (auto-approved).',
+    states: [['empty','Empty form'],['invalid','Validation error'],['submitting','Submitting'],['success','Success'],['discard','Discard confirm']] },
+  'TT-06': { title: 'Task Detail', route: '/tasks/:id', app: 'both', group: 'My work',
+    note: 'One task: both status tracks, the append-only history, and every action open to your role. §6 §7',
+    states: [['pending','Pending approval'],['changes','Needs changes'],['approved','Approved'],['overdue','Approved & overdue'],['done','Done']] },
+  'TT-07': { title: 'Company Overview', route: '/admin', app: 'admin', group: 'Administration',
+    note: 'Checked voluntarily, never pushed. Built to reward a glance. §10 §14.6',
+    states: [['loaded','Loaded'],['zero','All zero · healthy'],['high','High overdue count'],['loading','Loading skeleton']] },
+  'TT-08': { title: 'Approval Queue', route: '/admin/approvals', app: 'admin', group: 'Administration',
+    note: "Admin's primary action list — dense rows for one sitting. §5 §14.5",
+    states: [['pending','Pending tab'],['changes','Needs-changes tab'],['empty','Both empty'],['loading','Loading skeleton']] },
+  'TT-09': { title: 'Approve / Send Back', route: 'Overlay on /admin/approvals', app: 'admin', group: 'Administration',
+    note: 'The decision moment. The due date is previewed live before anything is committed. §7.1',
+    states: [['idle','Reviewing'],['adjusted','Duration adjusted'],['notereq','Note required'],['approved','Approved'],['sentback','Sent back']] },
+  'TT-10': { title: 'User Management', route: '/admin/users', app: 'admin', group: 'Administration',
+    note: 'Promote, demote, deactivate. The last-Admin guard is a designed state, not an edge case. §4.8',
+    states: [['loaded','Loaded'],['blocked','Last-admin blocked'],['deactivated','Deactivation confirmed'],['filtered','Search filtered']] },
+  'TT-11': { title: 'Login Audit Log', route: '/admin/login-audit', app: 'admin', group: 'Administration',
+    note: 'Low-frequency, read-only. A dense table is the right pattern here. §4.7',
+    states: [['loaded','Loaded'],['filtered','Filtered'],['empty','Empty']] }
+};
+
+const TASKS = [
+  { id: 'TT-1042', title: 'Q3 payroll reconciliation — Kenya entity', approval: 'approved', work: 'in_progress', dur: '5 days', due: '12 Sep 2026', overdue: false,
+    desc: 'Reconcile the July–September payroll runs against the client statements for the Nairobi entity, including the two mid-cycle salary revisions.' },
+  { id: 'TT-1039', title: 'Work permit renewals — Tanzania (4 staff)', approval: 'approved', work: 'not_started', dur: '3 days', due: '2 Sep 2026', overdue: true,
+    desc: 'Four expatriate work permits lapse at the end of the month. Immigration wants the renewal pack in one submission.' },
+  { id: 'TT-1051', title: 'Onboard 6 hires — Ghana entity', approval: 'pending', work: 'not_started', dur: '3 days', due: null, overdue: false,
+    desc: 'Contracts, statutory registrations and payroll setup for six hires starting 15 Sep. Two are on fixed-term contracts.' },
+  { id: 'TT-1047', title: 'Update EOR contract template — Nigeria', approval: 'changes', work: 'in_progress', dur: '2 days', due: null, overdue: false,
+    desc: 'Bring the standard employer-of-record agreement in line with the 2026 labour amendments before the next client cohort signs.' },
+  { id: 'TT-1029', title: 'Client invoice reconciliation — Q2', approval: 'approved', work: 'in_progress', dur: '1 week', due: '4 Sep 2026', overdue: true,
+    desc: 'Match Q2 service invoices against delivered headcount across all six managed entities.' },
+  { id: 'TT-1033', title: 'Statutory filings pack — Rwanda RSSB', approval: 'approved', work: 'done', dur: '2 days', due: '28 Aug 2026', overdue: false,
+    desc: 'Quarterly social-security filings for the Kigali entity, submitted and acknowledged.' },
+  { id: 'TT-1055', title: 'Benefits vendor review — Uganda', approval: 'pending', work: 'in_progress', dur: '1 week', due: null, overdue: false,
+    desc: 'Compare the three shortlisted medical-cover providers for the Kampala team and recommend one.' },
+  { id: 'TT-1058', title: 'Draft severance guidance — Zambia', approval: 'pending', work: 'not_started', dur: '2 days', due: null, overdue: false,
+    desc: 'A one-page internal note on notice periods and statutory severance for the Lusaka entity.' }
+];
+
+const QUEUE_PENDING = [
+  { id: 'TT-1051', title: 'Onboard 6 hires — Ghana entity', assignee: 'Kwame Mensah', duration: '3 days', submitted: '3 Sep 2026' },
+  { id: 'TT-1055', title: 'Benefits vendor review — Uganda', assignee: 'Amara Okafor', duration: '1 week', submitted: '3 Sep 2026' },
+  { id: 'TT-1058', title: 'Draft severance guidance — Zambia', assignee: 'Amara Okafor', duration: '2 days', submitted: '2 Sep 2026' },
+  { id: 'TT-1060', title: 'Migrate timesheets — Senegal pilot', assignee: 'Fatima Diallo', duration: '2 weeks', submitted: '2 Sep 2026' },
+  { id: 'TT-1061', title: 'Quarterly tax cert requests — Kenya', assignee: 'Joseph Mwangi', duration: '4 days', submitted: '1 Sep 2026' }
+];
+const QUEUE_CHANGES = [
+  { id: 'TT-1047', title: 'Update EOR contract template — Nigeria', assignee: 'Amara Okafor', duration: '2 days', submitted: '1 Sep 2026' },
+  { id: 'TT-1044', title: 'Headcount report — Southern Africa', assignee: 'Lindiwe Ndlovu', duration: '1 day', submitted: '31 Aug 2026' }
+];
+
+const USERS = [
+  { name: 'Thabo Molefe', email: 'thabo.molefe@itmafrica.com', role: 'Admin', mfa: 'Enrolled', active: 'Active', last: true },
+  { name: 'Amara Okafor', email: 'amara.okafor@itmafrica.com', role: 'Staff', mfa: 'Enrolled', active: 'Active' },
+  { name: 'Chiamaka Eze', email: 'chiamaka.eze@itmafrica.com', role: 'Staff', mfa: 'Enrolled', active: 'Active' },
+  { name: 'Joseph Mwangi', email: 'joseph.mwangi@itmafrica.com', role: 'Staff', mfa: 'Enrolled', active: 'Active' },
+  { name: 'Fatima Diallo', email: 'fatima.diallo@itmafrica.com', role: 'Staff', mfa: 'Not enrolled', active: 'Active' },
+  { name: 'Lindiwe Ndlovu', email: 'lindiwe.ndlovu@itmafrica.com', role: 'Staff', mfa: 'Enrolled', active: 'Active' },
+  { name: 'Kwame Mensah', email: 'kwame.mensah@itmafrica.com', role: 'Staff', mfa: 'Enrolled', active: 'Active' },
+  { name: 'Grace Achieng', email: 'grace.achieng@itmafrica.com', role: 'Staff', mfa: 'Enrolled', active: 'Inactive' }
+];
+
+const AUDIT = [
+  { ts: '4 Sep 2026 08:12', email: 'amara.okafor@itmafrica.com', ip: '197.248.14.22', ok: true, mfa: 'Passed', fp: 'Match' },
+  { ts: '4 Sep 2026 08:04', email: 'thabo.molefe@itmafrica.com', ip: '102.68.77.9', ok: true, mfa: 'Passed', fp: 'Match' },
+  { ts: '4 Sep 2026 07:58', email: 'kwame.mensah@itmafrica.com', ip: '154.160.9.140', ok: false, mfa: 'Failed', fp: 'Match' },
+  { ts: '4 Sep 2026 07:57', email: 'kwame.mensah@itmafrica.com', ip: '154.160.9.140', ok: false, mfa: 'Failed', fp: 'Match' },
+  { ts: '3 Sep 2026 17:41', email: 'lindiwe.ndlovu@itmafrica.com', ip: '41.13.204.77', ok: true, mfa: 'Passed', fp: 'New device' },
+  { ts: '3 Sep 2026 16:20', email: 'joseph.mwangi@itmafrica.com', ip: '197.248.14.22', ok: true, mfa: 'Passed', fp: 'Match' },
+  { ts: '3 Sep 2026 15:02', email: 'unknown@gmail.com', ip: '185.220.101.7', ok: false, mfa: '—', fp: 'Unknown' },
+  { ts: '3 Sep 2026 09:14', email: 'fatima.diallo@itmafrica.com', ip: '41.82.166.3', ok: true, mfa: 'Passed', fp: 'Match' }
+];
+
+const WORKLOAD = [
+  { name: 'Chiamaka Eze', count: 9, overdue: 3 },
+  { name: 'Amara Okafor', count: 7, overdue: 2 },
+  { name: 'Joseph Mwangi', count: 6, overdue: 1 },
+  { name: 'Kwame Mensah', count: 5, overdue: 1 },
+  { name: 'Fatima Diallo', count: 4, overdue: 0 },
+  { name: 'Lindiwe Ndlovu', count: 2, overdue: 0 }
+];
+
+class Component extends DCLogic {
+  state = { app: 'staff', screen: 'TT-03', st: 'loaded', theme: 'light', detail: 'approved' };
+
+  componentDidMount() { document.documentElement.dataset.itmTheme = this.state.theme; }
+
+  setTheme = () => {
+    const theme = this.state.theme === 'light' ? 'dark' : 'light';
+    document.documentElement.dataset.itmTheme = theme;
+    this.setState({ theme });
+  };
+
+  go = (screen) => () => {
+    const s = SCREENS[screen];
+    this.setState({ screen, st: s.states[0][0] });
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  };
+
+  pickState = (st) => () => this.setState({ st });
+
+  // ---- shared style builders ----
+  badge(kind) {
+    const map = {
+      pending: ['--st-pending-bg', '--st-pending', 'Pending Approval'],
+      changes: ['--st-changes-bg', '--st-changes', 'Needs Changes'],
+      approved: ['--st-approved-bg', '--st-approved', 'Approved'],
+      not_started: ['--st-idle-bg', '--st-idle', 'Not Started'],
+      in_progress: ['--st-progress-bg', '--st-progress', 'In Progress'],
+      done: ['--st-approved-bg', '--st-approved', 'Done']
+    };
+    const [bg, fg, label] = map[kind];
+    return { label, style: `display:inline-flex;align-items:center;gap:5px;padding:2px 8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-family:var(--font-heading);white-space:nowrap;background:var(${bg});color:var(${fg});border:1px solid color-mix(in srgb, var(${fg}) 40%, transparent)` };
+  }
+  plain(fg) {
+    return `display:inline-flex;align-items:center;gap:5px;padding:2px 8px;font-size:11px;letter-spacing:.09em;text-transform:uppercase;font-family:var(--font-heading);white-space:nowrap;border:1px solid color-mix(in srgb, ${fg} 40%, transparent);color:${fg}`;
+  }
+  dateChip(t) {
+    if (t.overdue) return { dateLabel: 'Overdue · due ' + t.due, dateStyle: this.plain('var(--st-over)') };
+    if (t.due) return { dateLabel: 'Due ' + t.due, dateStyle: 'font-size:12px;opacity:.6;white-space:nowrap' };
+    return { dateLabel: 'Awaiting approval · ' + t.dur + ' requested', dateStyle: 'font-size:12px;opacity:.6;white-space:nowrap' };
+  }
+  row(t) {
+    const a = this.badge(t.approval), w = this.badge(t.work), d = this.dateChip(t);
+    return Object.assign({
+      id: t.id, title: t.title, open: this.openTask(t),
+      approvalLabel: a.label, approvalStyle: a.style,
+      workLabel: w.label, workStyle: w.style,
+      segName: 'work-' + t.id,
+      isNotStarted: t.work === 'not_started', isInProgress: t.work === 'in_progress', isDone: t.work === 'done',
+      rowStyle: 'padding:13px 15px;display:flex;flex-wrap:wrap;gap:12px 16px;align-items:center;justify-content:space-between'
+        + (t.overdue ? ';border-left:2px solid var(--st-over)' : '')
+    }, d);
+  }
+  openTask = (t) => () => {
+    const map = { pending: 'pending', changes: 'changes', approved: t.overdue ? 'overdue' : (t.work === 'done' ? 'done' : 'approved') };
+    this.setState({ screen: 'TT-06', st: map[t.approval], detail: t.id });
+    if (typeof window !== 'undefined') window.scrollTo(0, 0);
+  };
+
+  detailTask() {
+    const st = this.state.st;
+    const byState = { pending: 'TT-1051', changes: 'TT-1047', approved: 'TT-1042', overdue: 'TT-1039', done: 'TT-1033' };
+    return TASKS.find(t => t.id === byState[st]) || TASKS[0];
+  }
+
+  renderVals() {
+    const { app, screen, st, theme } = this.state;
+    const s = SCREENS[screen] || SCREENS['TT-03'];
+    const isAdmin = app === 'admin', isStaff = !isAdmin;
+
+    // nav
+    const groups = [];
+    const mk = (ids) => ids.map(id => ({
+      id, label: SCREENS[id].title, go: this.go(id),
+      style: 'display:flex;align-items:center;gap:9px;width:100%;text-align:left;background:'
+        + (screen === id ? 'color-mix(in srgb, var(--color-accent) 16%, transparent)' : 'none')
+        + ';border:0;border-left:2px solid ' + (screen === id ? 'var(--color-accent)' : 'transparent')
+        + ';color:inherit;font:inherit;font-size:13.5px;padding:7px 18px;cursor:pointer;min-height:38px'
+    }));
+    groups.push({ label: 'My work', items: mk(['TT-03', 'TT-04', 'TT-05', 'TT-06']) });
+    if (isAdmin) groups.push({ label: 'Administration', items: mk(['TT-07', 'TT-08', 'TT-09', 'TT-10', 'TT-11']) });
+    groups.push({ label: 'Pre-session screens', items: mk(['TT-01', 'TT-02']) });
+
+    const chip = (on) => 'background:' + (on ? 'var(--color-accent)' : 'transparent') + ';color:' + (on ? 'var(--color-bg)' : 'inherit')
+      + ';border:1px solid ' + (on ? 'var(--color-accent)' : 'var(--color-divider)')
+      + ';font:inherit;font-size:11.5px;letter-spacing:.06em;padding:4px 10px;cursor:pointer;white-space:nowrap';
+
+    const v = {
+      themeLabel: theme === 'light' ? 'Light' : 'Dark',
+      toggleTheme: this.setTheme,
+      appName: isAdmin ? 'Task Tracking · Admin' : 'Task Tracking',
+      userName: isAdmin ? 'Thabo Molefe' : 'Amara Okafor',
+      userInitials: isAdmin ? 'TM' : 'AO',
+      userRole: isAdmin ? 'Administrator' : 'Staff · Compliance',
+      navGroups: groups,
+      screenId: screen, screenTitle: s.title, screenRoute: s.route, screenNote: s.note,
+      stateChips: s.states.map(([k, label]) => ({ label, pick: this.pickState(k), style: chip(k === st) })),
+      isAdmin, isStaff,
+      goCreate: this.go('TT-05'), goList: this.go('TT-04'), goDetail: this.go('TT-06'),
+      goAdminHome: this.go('TT-07'),
+      goApprovals: this.go('TT-08'), goUsers: this.go('TT-10'), openPanel: this.go('TT-09'),
+      isTT01: screen === 'TT-01', isTT02: screen === 'TT-02', isTT03: screen === 'TT-03',
+      isTT04: screen === 'TT-04', isTT05: screen === 'TT-05', isTT06: screen === 'TT-06',
+      isTT07: screen === 'TT-07', isTT08: screen === 'TT-08', isTT09: screen === 'TT-09',
+      isTT10: screen === 'TT-10', isTT11: screen === 'TT-11',
+      true: true
+    };
+
+    // TT-01
+    v.tt01Error = screen === 'TT-01' && st === 'error';
+    v.tt01Redirecting = screen === 'TT-01' && st === 'redirecting';
+    v.tt01ButtonLabel = v.tt01Redirecting ? 'Signing in…' : 'Sign in with Google';
+
+    // TT-02
+    const enroll = st === 'enroll', stepup = st === 'stepup';
+    v.tt02Enroll = screen === 'TT-02' && enroll;
+    v.tt02Incorrect = screen === 'TT-02' && st === 'incorrect';
+    v.tt02Locked = screen === 'TT-02' && st === 'locked';
+    v.tt02Heading = enroll ? 'Set up your authenticator' : stepup ? 'Verify this device' : 'Two-factor verification';
+    v.tt02Helper = enroll
+      ? 'One-time setup. Scan the code below, then enter the 6-digit code your app shows to finish signing in.'
+      : stepup ? 'We noticed a new device — please verify again.'
+      : 'Enter the 6-digit code from your authenticator app.';
+    const digitsFor = { verifying: '4 8 2 9 1 3', incorrect: '7 1 0 4 5 2', entry: '4 8 2', stepup: '4 8 2' };
+    const raw = (digitsFor[st] || '').split(' ').filter(Boolean);
+    v.tt02Digits = [0, 1, 2, 3, 4, 5].map(i => ({
+      ch: raw[i] || '',
+      style: 'flex:1;min-width:0;height:48px;display:grid;place-items:center;font-family:var(--font-heading);font-size:22px;border:1px solid '
+        + (st === 'incorrect' ? 'var(--st-changes)' : (raw[i] ? 'color-mix(in srgb, var(--color-text) 45%, transparent)' : 'var(--color-divider)'))
+        + ';background:var(--color-bg)' + (st === 'locked' ? ';opacity:.45' : '')
+    }));
+    v.tt02VerifyLabel = st === 'verifying' ? 'Verifying…' : 'Verify and continue';
+    v.tt02VerifyDisabled = st === 'verifying' || st === 'locked';
+
+    // TT-03
+    const mine = ['TT-1042', 'TT-1039', 'TT-1047', 'TT-1055', 'TT-1058', 'TT-1033'].map(id => TASKS.find(t => t.id === id));
+    v.tt03Loading = st === 'loading';
+    v.tt03Ready = st !== 'loading';
+    v.tt03Empty = st === 'empty';
+    v.tt03HasList = st !== 'empty';
+    v.tt03Banner = st === 'changes';
+    v.greeting = isAdmin ? 'Good morning, Thabo' : 'Good morning, Amara';
+    const overdueCount = st === 'empty' ? 0 : (st === 'overdue' ? 2 : 1);
+    v.tt03Stats = st === 'empty'
+      ? [{ label: 'Not started', value: '0', sub: 'Nothing queued', color: 'var(--color-text)' },
+         { label: 'In progress', value: '0', sub: 'Nothing open', color: 'var(--color-text)' },
+         { label: 'Done', value: '0', sub: 'This quarter', color: 'var(--color-text)' },
+         { label: 'Overdue', value: '0', sub: 'All clear', color: 'var(--color-text)' }]
+      : [{ label: 'Not started', value: '2', sub: '1 awaiting approval', color: 'var(--color-text)' },
+         { label: 'In progress', value: '3', sub: '2 approved, 1 sent back', color: 'var(--color-text)' },
+         { label: 'Done', value: '1', sub: 'Closed this month', color: 'var(--color-text)' },
+         { label: 'Overdue', value: String(overdueCount), sub: overdueCount ? 'Past due, not yet done' : 'All clear', color: overdueCount ? 'var(--st-over)' : 'var(--color-text)' }];
+    const t3source = st === 'overdue' ? mine : mine.map(t => (t.id === 'TT-1029' ? t : t));
+    v.tt03Tasks = (st === 'overdue' ? [TASKS[1], TASKS[4], TASKS[0], TASKS[3], TASKS[6], TASKS[5]] : t3source).map(t => this.row(t));
+
+    // TT-04
+    const filtered = st === 'filtered';
+    v.tt04Loading = st === 'loading';
+    v.tt04Empty = st === 'empty';
+    v.tt04HasRows = st === 'loaded' || filtered;
+    v.tt04Filtered = filtered || st === 'empty';
+    v.tt04Query = filtered ? 'payroll' : (st === 'empty' ? 'timesheet' : '');
+    v.tt04WorkFilter = filtered ? 'In progress' : 'Any work status';
+    v.tt04ApprovalFilter = filtered ? 'Approved' : 'Any approval status';
+    v.tt04DateFilter = filtered ? '1–30 Sep 2026' : 'Any date';
+    const t4rows = filtered ? [TASKS[0], TASKS[4]] : TASKS;
+    v.tt04Rows = t4rows.map(t => this.row(t));
+    v.tt04Count = filtered ? 'Showing 2 of 8 tasks · filters applied' : 'Showing 8 of 8 tasks';
+
+    // TT-05
+    v.tt05Invalid = st === 'invalid';
+    v.tt05Submitting = st === 'submitting';
+    v.tt05Success = st === 'success';
+    v.tt05Discard = st === 'discard';
+    v.tt05Title = st === 'invalid' ? '' : (st === 'empty' ? '' : 'Onboard 6 hires — Ghana entity');
+    v.tt05Desc = st === 'empty' || st === 'invalid' ? '' : 'Contracts, statutory registrations and payroll setup for six hires starting 15 Sep.';
+    v.tt05Dur = st === 'invalid' ? '' : (st === 'empty' ? '' : '3');
+    const errBorder = 'border-radius:0;border-color:var(--st-changes)';
+    v.tt05TitleStyle = st === 'invalid' ? errBorder : 'border-radius:0';
+    v.tt05DurStyle = (st === 'invalid' ? errBorder : 'border-radius:0') + ';width:78px';
+    v.tt05SubmitLabel = st === 'submitting' ? 'Submitting…' : (isAdmin ? 'Create Task' : 'Submit for Approval');
+    v.tt05SuccessMsg = isAdmin
+      ? 'Task created and approved automatically. Due 9 Sep 2026. Opening the task…'
+      : 'Submitted for approval. You can start work straight away — approval only sets the due date.';
+    v.tt05DurHelper = 'An estimate, not a fixed date — the due date is set once this is approved.';
+    v.tt05NextCopy = isAdmin
+      ? 'Tasks you assign skip approval entirely. The due date is computed the moment you save (today + duration) and the assignee sees it as Approved.'
+      : 'This starts as Pending Approval with no due date. Admin confirms or adjusts the duration; the due date is set from the moment of approval. You can move the work status at any time, approved or not.';
+
+    // TT-06
+    const dt = this.detailTask();
+    const dst = ['pending', 'changes', 'approved', 'overdue', 'done'].includes(st) ? st : 'approved';
+    const ab = this.badge(dst === 'changes' ? 'changes' : dst === 'pending' ? 'pending' : 'approved');
+    v.tt06Id = dt.id; v.tt06Title = dt.title; v.tt06Desc = dt.desc;
+    v.tt06ApprovalLabel = ab.label; v.tt06ApprovalStyle = ab.style;
+    v.tt06ApprovalMeta = dst === 'pending' ? 'Submitted 3 Sep 2026'
+      : dst === 'changes' ? 'Sent back 3 Sep 2026' : 'Approved 1 Sep 2026 by Thabo Molefe';
+    v.tt06IsNotStarted = dt.work === 'not_started'; v.tt06IsInProgress = dt.work === 'in_progress'; v.tt06IsDone = dt.work === 'done';
+    const noDue = dst === 'pending' || dst === 'changes';
+    v.tt06DateLabelTitle = noDue ? 'Requested duration' : 'Due date';
+    v.tt06DateValue = noDue ? dt.dur : dt.due;
+    v.tt06DateColor = dst === 'overdue' ? 'var(--st-over)' : 'var(--color-text)';
+    v.tt06DateMeta = noDue ? 'Awaiting approval — no due date exists yet.'
+      : dst === 'overdue' ? 'Overdue by 2 days' : 'approved_at + ' + dt.dur;
+    v.tt06Overdue = dst === 'overdue';
+    v.tt06Changes = dst === 'changes';
+    v.tt06CanEdit = isAdmin || noDue;
+    v.tt06AdminDisabled = !noDue;
+    v.tt06StaffDelete = isStaff && noDue;
+    const hcol = { created: 'var(--color-accent)', status_change: 'var(--st-progress)', sent_back: 'var(--st-changes)', resubmitted: 'var(--st-pending)', approved: 'var(--st-approved)' };
+    const H = {
+      pending: [['created', 'Created', 'Requested 3 days', 'Kwame Mensah', '3 Sep 2026, 09:12']],
+      changes: [['created', 'Created', 'Requested 2 days', 'Amara Okafor', '1 Sep 2026, 11:40'],
+                ['status_change', 'Status change', 'Not started → In progress', 'Amara Okafor', '2 Sep 2026, 08:31'],
+                ['sent_back', 'Sent back', '“Please split this into the two entity variants and re-estimate.”', 'Thabo Molefe', '3 Sep 2026, 14:02']],
+      approved: [['created', 'Created', 'Requested 5 days', 'Amara Okafor', '30 Aug 2026, 16:05'],
+                 ['approved', 'Approved', 'Duration confirmed at 5 days · due 12 Sep 2026', 'Thabo Molefe', '1 Sep 2026, 09:20'],
+                 ['status_change', 'Status change', 'Not started → In progress', 'Amara Okafor', '1 Sep 2026, 10:02']],
+      overdue: [['created', 'Created', 'Requested 3 days', 'Amara Okafor', '26 Aug 2026, 12:18'],
+                ['approved', 'Approved', 'Duration reduced to 3 days · due 2 Sep 2026', 'Thabo Molefe', '28 Aug 2026, 08:44']],
+      done: [['created', 'Created', 'Requested 2 days', 'Amara Okafor', '24 Aug 2026, 09:00'],
+             ['approved', 'Approved', 'Duration confirmed · due 28 Aug 2026', 'Thabo Molefe', '25 Aug 2026, 10:11'],
+             ['status_change', 'Status change', 'In progress → Done', 'Amara Okafor', '27 Aug 2026, 15:36']]
+    };
+    v.tt06History = (H[dst] || H.approved).map(([k, event, detail, who, when]) => ({ event, detail, who, when, color: hcol[k] }));
+
+    // TT-07
+    v.tt07Loading = st === 'loading';
+    v.tt07Ready = st !== 'loading';
+    v.tt07Zero = st === 'zero';
+    v.tt07HasWorkload = st !== 'zero';
+    v.tt07HighOverdue = st === 'high';
+    v.tt07Stats = st === 'zero'
+      ? [{ label: 'Total overdue', value: '0', sub: 'Nothing past due', color: 'var(--color-text)' },
+         { label: 'Pending approval', value: '0', sub: 'No tasks pending approval', color: 'var(--color-text)' },
+         { label: 'Needs changes', value: '0', sub: 'Nothing sent back', color: 'var(--color-text)' }]
+      : [{ label: 'Total overdue', value: st === 'high' ? '18' : '7', sub: st === 'high' ? 'Weekly email covers 6 of these' : 'Across 5 people', color: 'var(--st-over)' },
+         { label: 'Pending approval', value: '5', sub: 'Oldest submitted 1 Sep', color: 'var(--st-pending)' },
+         { label: 'Needs changes', value: '2', sub: 'Waiting on staff to resubmit', color: 'var(--st-changes)' }];
+    const wmax = st === 'high' ? 14 : 9;
+    v.tt07Workload = WORKLOAD.map(w => {
+      const count = st === 'high' ? w.count + 4 : w.count;
+      const od = st === 'high' ? w.overdue + 2 : w.overdue;
+      return { name: w.name, count: String(count), pct: Math.round(count / wmax * 100) + '%',
+        overdueLabel: od ? od + ' overdue' : '', overdueStyle: od ? this.plain('var(--st-over)') + ';font-size:10px' : 'display:none' };
+    });
+    v.tt07QueueSub = st === 'zero' ? 'Nothing waiting' : '5 pending · 2 need changes';
+
+    // TT-08
+    const tab = st === 'changes' ? 'changes' : 'pending';
+    v.tt08Loading = st === 'loading';
+    v.tt08Empty = st === 'empty';
+    v.tt08HasRows = st === 'pending' || st === 'changes';
+    v.tt08Tabs = [['pending', 'Pending Approval', QUEUE_PENDING.length], ['changes', 'Needs Changes', QUEUE_CHANGES.length]].map(([k, label, n]) => ({
+      label: label + '  ' + (st === 'empty' ? 0 : n),
+      pick: this.pickState(k),
+      style: 'background:none;border:0;border-bottom:2px solid ' + (k === tab && st !== 'empty' ? 'var(--color-accent)' : 'transparent')
+        + ';color:' + (k === tab && st !== 'empty' ? 'var(--color-text)' : 'color-mix(in srgb, var(--color-text) 55%, transparent)')
+        + ';font-family:var(--font-heading);font-size:15px;letter-spacing:.08em;text-transform:uppercase;padding:9px 4px;margin-bottom:-1px;cursor:pointer'
+    }));
+    v.tt08Rows = (tab === 'changes' ? QUEUE_CHANGES : QUEUE_PENDING).map(r => {
+      const b = this.badge(tab === 'changes' ? 'changes' : 'pending');
+      return Object.assign({}, r, { approvalLabel: b.label, approvalStyle: b.style });
+    });
+
+    // TT-09
+    const decided = st === 'approved' || st === 'sentback';
+    v.tt09Decided = decided;
+    v.tt09Reviewing = !decided;
+    v.tt09DecidedColor = st === 'sentback' ? 'var(--st-changes)' : 'var(--st-approved)';
+    v.tt09DecidedTitle = st === 'sentback' ? 'Sent back' : 'Approved';
+    v.tt09DecidedCopy = st === 'sentback'
+      ? 'Kwame will see your note on his dashboard with a one-tap resubmit. Nothing was emailed.'
+      : 'Due 9 Sep 2026. The task is now Approved and off your queue — work status stays wherever Kwame left it.';
+    const adjusted = st === 'adjusted';
+    v.tt09DurValue = adjusted ? '5' : '3';
+    v.tt09DurLabel = adjusted ? '5 days' : '3 days';
+    v.tt09DuePreview = adjusted ? '11 Sep 2026' : '9 Sep 2026';
+    v.tt09AdjustLabel = adjusted ? 'Reset to 3 days requested' : 'Adjust to 5 days';
+    v.tt09Adjust = this.pickState(adjusted ? 'idle' : 'adjusted');
+    v.tt09InProgressNote = true;
+    v.tt09NoteError = st === 'notereq';
+    v.tt09NoteReqLabel = '(required to send back)';
+    v.tt09NoteValue = '';
+    v.tt09NoteStyle = 'border-radius:0;min-height:78px' + (st === 'notereq' ? ';border-color:var(--st-changes)' : '');
+    v.tt09SendBackDisabled = st !== 'notereq';
+    v.tt09Approve = this.pickState('approved');
+    v.tt09SendBack = this.pickState(st === 'notereq' ? 'sentback' : 'notereq');
+
+    // TT-10
+    v.tt10Blocked = st === 'blocked';
+    v.tt10Deactivated = st === 'deactivated';
+    const ufilter = st === 'filtered';
+    v.tt10Query = ufilter ? 'Chi' : '';
+    const ulist = ufilter ? USERS.filter(u => u.name.startsWith('Chiamaka')) : USERS;
+    v.tt10Count = ufilter ? '1 of 8 accounts' : '8 accounts · 7 active · 1 admin';
+    v.tt10Users = ulist.map(u => {
+      const inactive = u.active === 'Inactive';
+      return {
+        name: u.name, email: u.email, role: u.role, mfa: u.mfa, active: u.active,
+        rowStyle: inactive ? 'opacity:.45' : '',
+        roleStyle: this.plain(u.role === 'Admin' ? 'var(--color-accent-700)' : 'var(--st-idle)'),
+        mfaStyle: u.mfa === 'Enrolled' ? 'font-size:12.5px;opacity:.75' : this.plain('var(--st-pending)') + ';font-size:10px',
+        activeStyle: inactive ? this.plain('var(--st-idle)') + ';font-size:10px' : 'font-size:12.5px;opacity:.75',
+        roleActionLabel: u.role === 'Admin' ? 'Demote to Staff' : 'Promote to Admin',
+        activeActionLabel: inactive ? 'Reactivate' : 'Deactivate',
+        disabled: inactive && false,
+        roleAction: u.last ? this.pickState('blocked') : this.pickState('loaded'),
+        deactivate: this.pickState('deactivated')
+      };
+    });
+
+    // TT-11
+    const afilter = st === 'filtered';
+    v.tt11Empty = st === 'empty';
+    v.tt11HasRows = st !== 'empty';
+    v.tt11Query = afilter ? 'kwame.mensah@itmafrica.com' : '';
+    v.tt11Outcome = afilter ? 'Failure' : 'Any outcome';
+    v.tt11Range = afilter ? '1–4 Sep 2026' : 'Last 30 days';
+    v.tt11Count = afilter ? '2 of 583 attempts' : '583 attempts';
+    v.tt11Rows = (afilter ? AUDIT.filter(r => !r.ok && r.email.startsWith('kwame')) : AUDIT).map(r => ({
+      ts: r.ts, email: r.email, ip: r.ip,
+      result: r.ok ? 'Success' : 'Failure',
+      resultStyle: this.plain(r.ok ? 'var(--st-approved)' : 'var(--st-changes)'),
+      mfa: r.mfa,
+      mfaStyle: r.mfa === 'Passed' ? 'font-size:12.5px;opacity:.7' : this.plain('var(--st-changes)') + ';font-size:10px',
+      fp: r.fp,
+      fpStyle: r.fp === 'Match' ? 'font-size:12.5px;opacity:.7' : this.plain('var(--st-pending)') + ';font-size:10px'
+    }));
+
+    return v;
+  }
+}
+
+</script>
+</body>
+</html>
