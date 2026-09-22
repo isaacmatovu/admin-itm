@@ -1,4 +1,4 @@
-// Server Component / Server Action entry point for calling the Go API.
+ // Server Component / Server Action entry point for calling the Go API.
 // Never import this from a "use client" file — next/headers only works in
 // a server context, and bundling it into client code breaks the build.
 import "server-only";

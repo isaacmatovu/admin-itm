@@ -3,13 +3,64 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Lock, Clock } from "lucide-react";
+import { Lock, Clock, AlertCircle } from "lucide-react";
 import { Blueprint } from "@/components/ui/Blueprint";
 import { clientApi, ApiError } from "@/lib/api-client";
 
-type Phase = "loading" | "enroll" | "entry" | "verifying" | "incorrect" | "locked";
+type Phase =
+  | "loading"
+  | "enroll"
+  | "entry"
+  | "verifying"
+  | "incorrect"
+  | "locked"
+  | "error";
 
 const MAX_ATTEMPTS = 5;
+
+/** Distinguishes "the pre-session is gone" from "that code was wrong" — the
+ *  API returns 403 for both (middleware.RequirePreSession vs HandleTOTPVerify's
+ *  invalid-code branch). Re-probing the read-only status endpoint answers it
+ *  authoritatively, and costs a request only on a failure path, which beats
+ *  string-matching an error message that isn't part of any contract. */
+async function preSessionAlive(): Promise<boolean> {
+  try {
+    await clientApi<TotpStatus>("/api/v1/auth/2fa/status");
+    return true;
+  } catch (err) {
+    return !(err instanceof ApiError && err.status === 403);
+  }
+}
+
+type TotpStatus = { enrolled: boolean };
+type TotpSetup = { qr_code_data_url: string; secret: string };
+
+/** The centered card every phase of this screen sits in — shared so the
+ *  loading and error states line up with the form instead of jumping. */
+function Shell({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        display: "grid",
+        placeItems: "center",
+        minHeight: "100vh",
+        padding: "20px 0",
+        background:
+          "radial-gradient(1100px circle at 50% -10%, color-mix(in srgb, var(--color-accent) 10%, transparent), transparent 60%)",
+      }}
+    >
+      <Blueprint
+        style={{
+          width: "100%",
+          maxWidth: 430,
+          padding: "clamp(22px, 6.5vw, 34px) clamp(18px, 5.5vw, 30px)",
+        }}
+      >
+        {children}
+      </Blueprint>
+    </div>
+  );
+}
 
 export function TwoFactorForm() {
   const router = useRouter();
@@ -23,28 +74,47 @@ export function TwoFactorForm() {
   const [retryAfterSec, setRetryAfterSec] = useState<number | null>(null);
   const inputs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Discover enrollment state: task-tracker has no "am I enrolled" read
-  // outside the pre-session flow itself, so we call /2fa/setup and branch
-  // on the result — it 400s harmlessly if the account is already enrolled
-  // (internal/auth/totp_handler.go's HandleTOTPSetup), never touching an
-  // existing secret.
+  // Read enrollment state from GET /2fa/status, then call POST /2fa/setup
+  // only when we actually need a QR to show. Inferring enrollment from
+  // whether /setup succeeded used to send anyone whose request failed for
+  // any unrelated reason — expired pre-session, CORS, 500, dropped
+  // connection — to the code-entry screen, including brand-new users who
+  // had nothing to enter and no route forward.
   useEffect(() => {
-    let cancelled = false;
-    clientApi<{ qr_code_data_url: string; secret: string }>("/api/v1/auth/2fa/setup", {
-      method: "POST",
-    })
-      .then((res) => {
-        if (cancelled) return;
-        setQr({ qrCodeDataUrl: res.qr_code_data_url, secret: res.secret });
+    const ac = new AbortController();
+
+    (async () => {
+      try {
+        const status = await clientApi<TotpStatus>("/api/v1/auth/2fa/status", {
+          signal: ac.signal,
+        });
+        if (status.enrolled) {
+          setPhase("entry");
+          return;
+        }
+        const setup = await clientApi<TotpSetup>("/api/v1/auth/2fa/setup", {
+          method: "POST",
+          signal: ac.signal,
+        });
+        setQr({ qrCodeDataUrl: setup.qr_code_data_url, secret: setup.secret });
         setPhase("enroll");
-      })
-      .catch(() => {
-        if (!cancelled) setPhase("entry");
-      });
+      } catch (err) {
+        if (ac.signal.aborted) return;
+        // No pre-session at all (missing, or past its 5-minute expiry) —
+        // there is nothing to verify, so restart the login rather than
+        // showing a code prompt that can only ever fail.
+        if (err instanceof ApiError && err.status === 403) {
+          router.replace("/login?error=1");
+          return;
+        }
+        setPhase("error");
+      }
+    })();
+
     return () => {
-      cancelled = true;
+      ac.abort();
     };
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     if (phase === "enroll" || phase === "entry") {
@@ -101,6 +171,19 @@ export function TwoFactorForm() {
         setPhase("locked");
         return;
       }
+      // A 403 here is either a rejected code or a pre-session that expired
+      // mid-flow. Only the first should burn an attempt; the second has to
+      // restart the login, since no code can ever succeed against it.
+      if (err instanceof ApiError && err.status === 403 && !(await preSessionAlive())) {
+        router.replace("/login?error=1");
+        return;
+      }
+      if (!(err instanceof ApiError) || err.status >= 500) {
+        // Network failure or server fault — the code was never judged, so
+        // don't count it against the user or tell them it was wrong.
+        setPhase("error");
+        return;
+      }
       setAttemptsLeft((n) => Math.max(0, n - 1));
       setDigits(Array(6).fill(""));
       setPhase("incorrect");
@@ -112,6 +195,75 @@ export function TwoFactorForm() {
   const locked = phase === "locked";
   const verifying = phase === "verifying";
   const incorrect = phase === "incorrect";
+
+  // Until /2fa/status answers we don't know whether this account needs the
+  // QR or the code boxes, and rendering the code boxes meanwhile flashed the
+  // wrong screen at every user who was about to enroll.
+  if (phase === "loading") {
+    return (
+      <Shell>
+        <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+          <span className="sk" style={{ width: 170, height: 20, borderRadius: 7 }} />
+          <span className="sk" style={{ width: "100%", height: 13, borderRadius: 6 }} />
+          <span className="sk" style={{ width: "100%", height: 58, borderRadius: 10 }} />
+        </div>
+      </Shell>
+    );
+  }
+
+  if (phase === "error") {
+    return (
+      <Shell>
+        <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              style={{
+                width: 36,
+                height: 36,
+                flex: "none",
+                borderRadius: 10,
+                background: "var(--st-changes-bg)",
+                display: "grid",
+                placeItems: "center",
+              }}
+            >
+              <AlertCircle size={17} strokeWidth={2} color="var(--st-changes)" />
+            </span>
+            <div
+              style={{
+                fontFamily: "var(--font-heading)",
+                fontWeight: 700,
+                fontSize: 19,
+                letterSpacing: "-0.01em",
+              }}
+            >
+              Couldn&apos;t reach the server
+            </div>
+          </div>
+          <div style={{ fontSize: 13.5, opacity: 0.7 }}>
+            Your sign-in is still in progress — we just couldn&apos;t load your two-factor
+            settings. Check your connection and try again.
+          </div>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => window.location.reload()}
+            style={{ width: "100%", minHeight: 44, fontSize: 14 }}
+          >
+            Try again
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => router.replace("/login")}
+            style={{ width: "100%", minHeight: 40, fontSize: 13.5 }}
+          >
+            Start over
+          </button>
+        </div>
+      </Shell>
+    );
+  }
 
   return (
     <div
