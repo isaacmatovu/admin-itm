@@ -10,6 +10,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 :root {
+  color-scheme: light;
+  --color-on-accent: #ffffff;
   --color-bg: #f6f8fc;
   --color-surface: #ffffff;
   --color-text: #1f2430;
@@ -53,9 +55,15 @@
   --radius-lg: 16px;
   --radius-full: 999px;
 
-  --shadow-sm: 0 1px 2px color-mix(in srgb, #21252c 8%, transparent), 0 1px 1px color-mix(in srgb, #21252c 6%, transparent);
-  --shadow-md: 0 4px 12px color-mix(in srgb, #21252c 12%, transparent), 0 1px 3px color-mix(in srgb, #21252c 8%, transparent);
-  --shadow-lg: 0 12px 32px color-mix(in srgb, #21252c 18%, transparent), 0 2px 8px color-mix(in srgb, #21252c 10%, transparent);
+  --shadow-sm:
+    0 1px 2px color-mix(in srgb, #21252c 8%, transparent),
+    0 1px 1px color-mix(in srgb, #21252c 6%, transparent);
+  --shadow-md:
+    0 4px 12px color-mix(in srgb, #21252c 12%, transparent),
+    0 1px 3px color-mix(in srgb, #21252c 8%, transparent);
+  --shadow-lg:
+    0 12px 32px color-mix(in srgb, #21252c 18%, transparent),
+    0 2px 8px color-mix(in srgb, #21252c 10%, transparent);
 
   /* Product-specific status tokens — one pair per approval/work-status
      badge variant, plus the overdue accent. Soft tinted backgrounds with a
@@ -78,49 +86,64 @@
    The "system" default (no attribute) falls back to prefers-color-scheme. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-itm-theme="light"]) {
+    color-scheme: dark;
     --color-bg: #131417;
     --color-surface: #1e2025;
     --color-text: #e8eaed;
     --color-accent: #8ab4f8;
     --color-accent-2: #aecbfa;
     --color-divider: color-mix(in srgb, #e8eaed 14%, transparent);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
-    --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
-    --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
-    --st-pending: #fdd663;
-    --st-pending-bg: #3a2f14;
-    --st-changes: #f28b82;
-    --st-changes-bg: #3d211f;
-    --st-approved: #81c995;
-    --st-approved-bg: #1c3324;
-    --st-idle: #c4c7c5;
-    --st-idle-bg: #2b2d31;
-    --st-progress: #8ab4f8;
-    --st-progress-bg: #1e2c42;
-    --st-over: #f28b82;
+    --color-accent-100: #1e2c42;
+    --color-accent-200: #2a3f5f;
+    --color-accent-300: #3b5a8a;
+    --color-accent-400: #5f8fd6;
+    --color-accent-500: #7aa5ee;
+    --color-accent-600: #8ab4f8;
+    --color-accent-700: #aecbfa;
+    --color-accent-800: #c6dafc;
+    --color-accent-900: #e0eafd;
+
+    --color-neutral-100: #25272c;
+    --color-neutral-200: #2f3238;
+    --color-neutral-300: #3c4048;
+    --color-neutral-400: #565b64;
+    --color-neutral-500: #7b818b;
+    --color-neutral-600: #9aa0a9;
+    --color-neutral-700: #b4b9c1;
+    --color-neutral-800: #cfd3d9;
+    --color-neutral-900: #e8eaed;
+
+    --color-on-accent: #0e2a54;
   }
 }
 :root[data-itm-theme="dark"] {
+  color-scheme: dark;
   --color-bg: #131417;
   --color-surface: #1e2025;
   --color-text: #e8eaed;
   --color-accent: #8ab4f8;
   --color-accent-2: #aecbfa;
-  --color-divider: color-mix(in srgb, #e8eaed 14%, transparent);
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.45);
-  --shadow-md: 0 4px 14px rgba(0, 0, 0, 0.5);
-  --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.55);
-  --st-pending: #fdd663;
-  --st-pending-bg: #3a2f14;
-  --st-changes: #f28b82;
-  --st-changes-bg: #3d211f;
-  --st-approved: #81c995;
-  --st-approved-bg: #1c3324;
-  --st-idle: #c4c7c5;
-  --st-idle-bg: #2b2d31;
-  --st-progress: #8ab4f8;
-  --st-progress-bg: #1e2c42;
-  --st-over: #f28b82;
+  --color-accent-100: #1e2c42;
+  --color-accent-200: #2a3f5f;
+  --color-accent-300: #3b5a8a;
+  --color-accent-400: #5f8fd6;
+  --color-accent-500: #7aa5ee;
+  --color-accent-600: #8ab4f8;
+  --color-accent-700: #aecbfa;
+  --color-accent-800: #c6dafc;
+  --color-accent-900: #e0eafd;
+
+  --color-neutral-100: #25272c;
+  --color-neutral-200: #2f3238;
+  --color-neutral-300: #3c4048;
+  --color-neutral-400: #565b64;
+  --color-neutral-500: #7b818b;
+  --color-neutral-600: #9aa0a9;
+  --color-neutral-700: #b4b9c1;
+  --color-neutral-800: #cfd3d9;
+  --color-neutral-900: #e8eaed;
+
+  --color-on-accent: #0e2a54;
 }
 
 body {
@@ -133,24 +156,54 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-heading);
   font-weight: var(--font-heading-weight);
   line-height: 1.25;
   letter-spacing: -0.01em;
   margin: 0 0 var(--space-2);
 }
-a { color: var(--color-accent); text-underline-offset: 3px; text-decoration: none; }
-a:hover { color: var(--color-accent-2); text-decoration: underline; }
-img { display: block; max-width: 100%; }
-:focus { outline: none; }
-:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 2px; }
-::selection { background: color-mix(in srgb, var(--color-accent) 28%, transparent); }
-.text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+a {
+  color: var(--color-accent);
+  text-underline-offset: 3px;
+  text-decoration: none;
+}
+a:hover {
+  color: var(--color-accent-2);
+  text-decoration: underline;
+}
+img {
+  display: block;
+  max-width: 100%;
+}
+:focus {
+  outline: none;
+}
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+.text-muted {
+  color: color-mix(in srgb, var(--color-text) 55%, transparent);
+}
 
 @keyframes itmpulse {
-  0%, 100% { opacity: 0.28; }
-  50% { opacity: 0.12; }
+  0%,
+  100% {
+    opacity: 0.28;
+  }
+  50% {
+    opacity: 0.12;
+  }
 }
 .sk {
   background: var(--color-text);
@@ -158,7 +211,10 @@ img { display: block; max-width: 100%; }
   animation: itmpulse 1.6s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) {
-  .sk { animation: none; opacity: 0.2; }
+  .sk {
+    animation: none;
+    opacity: 0.2;
+  }
 }
 
 /* — card frame: every panel, figure and stat card in the app — a soft
@@ -170,7 +226,9 @@ img { display: block; max-width: 100%; }
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
-  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+  transition:
+    box-shadow 0.15s ease,
+    border-color 0.15s ease;
 }
 a.blueprint:hover,
 button.blueprint:hover {
@@ -199,21 +257,70 @@ button.blueprint:hover {
      don't set their own minHeight, only the ones that need something
      bigger/smaller do. */
   min-height: 40px;
-  transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    color 0.15s ease;
 }
-.btn svg { display: block; }
-.btn:disabled { opacity: 0.45; cursor: not-allowed; }
-.btn-primary { background: var(--color-accent); color: #fff; box-shadow: var(--shadow-sm); }
-.btn-primary:hover:not(:disabled) { background: var(--color-accent-2); box-shadow: var(--shadow-md); }
-.btn-primary:active:not(:disabled) { background: var(--color-accent-700); box-shadow: none; }
-.btn-secondary { border-color: var(--color-divider); background: var(--color-surface); }
-.btn-secondary:hover:not(:disabled) { background: color-mix(in srgb, var(--color-text) 5%, var(--color-surface)); border-color: color-mix(in srgb, var(--color-text) 22%, transparent); }
-.btn-secondary:active:not(:disabled) { background: color-mix(in srgb, var(--color-text) 9%, var(--color-surface)); }
-.btn-ghost { color: var(--color-accent); padding-inline: var(--space-2); border-color: transparent; }
-.btn-ghost:hover:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 10%, transparent); }
-.btn-ghost:active:not(:disabled) { background: color-mix(in srgb, var(--color-accent) 18%, transparent); }
-.btn-icon { width: 38px; height: 38px; padding: 0; border-radius: var(--radius-md); }
-.btn-block { width: 100%; margin-top: var(--space-2); }
+.btn svg {
+  display: block;
+}
+.btn:hover {
+  text-decoration: none;
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.btn-primary {
+  background: var(--color-accent);
+  color: var(--color-on-accent);
+  box-shadow: var(--shadow-sm);
+}
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-accent-2);
+  color: var(--color-on-accent);
+  box-shadow: var(--shadow-md);
+}
+.btn-primary:active:not(:disabled) {
+  background: var(--color-accent-700);
+  box-shadow: none;
+}
+.btn-secondary {
+  border-color: var(--color-divider);
+  background: var(--color-surface);
+}
+.btn-secondary:hover:not(:disabled) {
+  color: var(--color-text);
+  background: color-mix(in srgb, var(--color-text) 5%, var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-text) 22%, transparent);
+}
+.btn-secondary:active:not(:disabled) {
+  background: color-mix(in srgb, var(--color-text) 9%, var(--color-surface));
+}
+.btn-ghost {
+  color: var(--color-accent);
+  padding-inline: var(--space-2);
+  border-color: transparent;
+}
+.btn-ghost:hover:not(:disabled) {
+  color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+}
+.btn-ghost:active:not(:disabled) {
+  background: color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+.btn-icon {
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border-radius: var(--radius-md);
+}
+.btn-block {
+  width: 100%;
+  margin-top: var(--space-2);
+}
 
 /* — forms — */
 .field > label {
@@ -234,15 +341,22 @@ button.blueprint:hover {
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
   border-radius: var(--radius-md);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
-.input:hover { border-color: color-mix(in srgb, var(--color-text) 30%, transparent); }
+.input:hover {
+  border-color: color-mix(in srgb, var(--color-text) 30%, transparent);
+}
 .input:focus-visible {
   border-color: var(--color-accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 22%, transparent);
   outline-offset: 0;
 }
-textarea.input { min-height: 96px; resize: vertical; }
+textarea.input {
+  min-height: 96px;
+  resize: vertical;
+}
 .seg {
   display: inline-flex;
   padding: 3px;
@@ -261,7 +375,10 @@ textarea.input { min-height: 96px; resize: vertical; }
   color: color-mix(in srgb, var(--color-text) 62%, transparent);
   border-radius: calc(var(--radius-md) - 4px);
   cursor: pointer;
-  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 .seg-opt input {
   position: absolute;
@@ -270,9 +387,18 @@ textarea.input { min-height: 96px; resize: vertical; }
   height: 0;
   pointer-events: none;
 }
-.seg-opt:has(input:checked) { background: var(--color-surface); color: var(--color-text); box-shadow: var(--shadow-sm); }
-.seg-opt:not(:has(input:checked)):hover { color: var(--color-text); }
-.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+.seg-opt:has(input:checked) {
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: var(--shadow-sm);
+}
+.seg-opt:not(:has(input:checked)):hover {
+  color: var(--color-text);
+}
+.seg-opt:has(input:focus-visible) {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
 
 /* — tags / badges — */
 .tag {
@@ -284,9 +410,18 @@ textarea.input { min-height: 96px; resize: vertical; }
   padding: 4px 10px;
   border-radius: var(--radius-full);
 }
-.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
-.tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
-.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+.tag-accent {
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+}
+.tag-neutral {
+  background: var(--color-neutral-100);
+  color: var(--color-neutral-800);
+}
+.tag-outline {
+  border: 1px solid var(--color-accent);
+  color: var(--color-accent);
+}
 
 /* — cards — */
 .card {
@@ -299,16 +434,49 @@ textarea.input { min-height: 96px; resize: vertical; }
   border: 1px solid var(--color-divider);
   box-shadow: var(--shadow-sm);
 }
-.card-kicker { font-size: 11px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--color-accent); }
-.card-title { font-family: var(--font-heading); font-weight: var(--font-heading-weight); font-size: 17px; line-height: 1.3; }
-.card-body { margin: 0; font-size: 13.5px; opacity: 0.75; flex: 1; }
-.card-meta { display: flex; align-items: center; gap: 6px; font-size: 12px; color: color-mix(in srgb, var(--color-text) 50%, transparent); }
-.elev-sm { box-shadow: var(--shadow-sm); }
-.elev-md { box-shadow: var(--shadow-md); }
-.elev-lg { box-shadow: var(--shadow-lg); }
+.card-kicker {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-accent);
+}
+.card-title {
+  font-family: var(--font-heading);
+  font-weight: var(--font-heading-weight);
+  font-size: 17px;
+  line-height: 1.3;
+}
+.card-body {
+  margin: 0;
+  font-size: 13.5px;
+  opacity: 0.75;
+  flex: 1;
+}
+.card-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+.elev-sm {
+  box-shadow: var(--shadow-sm);
+}
+.elev-md {
+  box-shadow: var(--shadow-md);
+}
+.elev-lg {
+  box-shadow: var(--shadow-lg);
+}
 
 /* — tables — */
-.table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 13.5px; }
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 13.5px;
+}
 .table th {
   text-align: left;
   font-size: 12px;
@@ -319,15 +487,25 @@ textarea.input { min-height: 96px; resize: vertical; }
   white-space: nowrap;
   background: color-mix(in srgb, var(--color-text) 3%, var(--color-surface));
 }
-.table th:first-child { border-top-left-radius: var(--radius-md); }
-.table th:last-child { border-top-right-radius: var(--radius-md); }
+.table th:first-child {
+  border-top-left-radius: var(--radius-md);
+}
+.table th:last-child {
+  border-top-right-radius: var(--radius-md);
+}
 .table td {
   padding: 12px 14px;
   border-bottom: 1px solid var(--color-divider);
 }
-.table tbody tr { transition: background-color 0.1s ease; }
-.table tbody tr:hover { background: color-mix(in srgb, var(--color-accent) 4%, transparent); }
-.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr {
+  transition: background-color 0.1s ease;
+}
+.table tbody tr:hover {
+  background: color-mix(in srgb, var(--color-accent) 4%, transparent);
+}
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
 
 /* — dialog (native <dialog>, see components/ui/Modal.tsx) — */
 dialog.dialog {
@@ -337,6 +515,7 @@ dialog.dialog {
   border-radius: var(--radius-lg);
   background: transparent;
   overscroll-behavior: contain;
+  color: var(--color-text);
 }
 dialog.dialog::backdrop {
   background: color-mix(in srgb, #0b1220 55%, transparent);
@@ -353,7 +532,10 @@ dialog.dialog::backdrop {
   overflow: auto;
 }
 @media (min-width: 640px) {
-  .dialog-panel { padding: 26px 28px; gap: 18px; }
+  .dialog-panel {
+    padding: 26px 28px;
+    gap: 18px;
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════════════
@@ -405,7 +587,9 @@ dialog.dialog::backdrop {
   transform: translateX(0);
   box-shadow: var(--shadow-lg);
 }
-.app-sidebar-close { display: inline-flex; }
+.app-sidebar-close {
+  display: inline-flex;
+}
 .app-backdrop {
   position: fixed;
   inset: 0;
@@ -421,8 +605,12 @@ dialog.dialog::backdrop {
 }
 
 @media (min-width: 880px) {
-  .app-shell { flex-direction: row; }
-  .app-topbar { display: none; }
+  .app-shell {
+    flex-direction: row;
+  }
+  .app-topbar {
+    display: none;
+  }
   .app-sidebar {
     position: static;
     transform: none;
@@ -431,7 +619,14 @@ dialog.dialog::backdrop {
     box-shadow: none;
     z-index: auto;
   }
-  .app-sidebar-close { display: none; }
-  .app-backdrop { display: none; }
-  .app-main { padding: 28px 32px 60px; max-width: 1280px; }
+  .app-sidebar-close {
+    display: none;
+  }
+  .app-backdrop {
+    display: none;
+  }
+  .app-main {
+    padding: 28px 32px 60px;
+    max-width: 1280px;
+  }
 }

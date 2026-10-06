@@ -4,18 +4,21 @@ import { useState } from "react";
 import { AlertCircle, LogIn } from "lucide-react";
 import { Blueprint } from "@/components/ui/Blueprint";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
 export function LoginForm({ initialError }: { initialError: boolean }) {
   const [redirecting, setRedirecting] = useState(false);
 
   function signIn() {
     setRedirecting(true);
-    // A cross-origin, full-page navigation to the Go API (which itself
-    // 307s on to Google) — not an internal Next.js route, so this isn't
-    // the relative-navigation case the lint rule is meant to catch.
+      // Full-page navigation to this app's own /api/v1 (rewritten to the Go API
+    // in next.config.ts, which 307s on to Google) — not an internal Next.js route.
+    //
+    // return_to tells the API this app proxies /api/v1 through its own
+    // origin, so Google calls back here (and every auth cookie lands on
+    // this domain) and the API sends us back to this app, not staff's.
     // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.href = `${API_URL}/api/v1/auth/google/login`;
+    window.location.href = `${API_URL}/api/v1/auth/google/login?return_to=${encodeURIComponent(window.location.origin)}`;
   }
 
   return (

@@ -8,10 +8,14 @@ import { verifySessionToken, cookieNames, type SessionClaims } from "@/lib/jwt";
 const PUBLIC_PATHS = ["/login", "/verify-2fa"];
 
 function isPublicPath(pathname: string): boolean {
-  return PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+  return PUBLIC_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`),
+  );
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080";
+// Server-side, so the API's real address — not the browser-facing
+// same-origin /api/v1 rewrite.
+const API_URL = process.env.API_INTERNAL_URL ?? "http://localhost:8080";
 
 /**
  * Attempts a silent refresh via the API's rotating-refresh-token endpoint
@@ -26,15 +30,24 @@ async function tryRefresh(
   try {
     const res = await fetch(`${API_URL}/api/v1/auth/refresh`, {
       method: "POST",
-      headers: { Cookie: request.headers.get("cookie") ?? "" },
+      headers: {
+        Cookie: request.headers.get("cookie") ?? "",
+        "User-Agent": request.headers.get("user-agent") ?? "",
+      },
     });
+    console.log("[proxy] refresh ->", res.status, await res.clone().text());
     if (!res.ok) return null;
 
     const setCookies: string[] =
       (res.headers as { getSetCookie?: () => string[] }).getSetCookie?.() ?? [];
     if (setCookies.length === 0) return null;
 
-    const response = NextResponse.next();
+    const headers = new Headers(request.headers);
+    headers.set(
+      "cookie",
+      mergeCookies(request.headers.get("cookie") ?? "", setCookies),
+    );
+    const response = NextResponse.next({ request: { headers } });
     for (const sc of setCookies) response.headers.append("set-cookie", sc);
 
     const newAccess = setCookies
@@ -50,6 +63,20 @@ async function tryRefresh(
   } catch {
     return null;
   }
+}
+
+function mergeCookies(original: string, setCookies: string[]): string {
+  const jar = new Map<string, string>();
+  for (const part of original.split(/;\s*/)) {
+    const i = part.indexOf("=");
+    if (i > 0) jar.set(part.slice(0, i), part.slice(i + 1));
+  }
+  for (const sc of setCookies) {
+    const kv = sc.split(";")[0];
+    const i = kv.indexOf("=");
+    if (i > 0) jar.set(kv.slice(0, i).trim(), kv.slice(i + 1));
+  }
+  return [...jar].map(([k, v]) => `${k}=${v}`).join("; ");
 }
 
 export async function proxy(request: NextRequest) {
@@ -108,7 +135,11 @@ export const config = {
   // "icon" is a deliberate prefix match, not just the exact /icon route —
   // it also covers /icon-192, /icon-512 and /icon-512-maskable in one go
   // (apple-icon is separate since "apple-icon" doesn't start with "icon").
+  //
+  // "api/" is excluded too: /api/v1/* is the rewrite to the Go API (see
+  // next.config.ts), which does its own auth. Gating it here would bounce
+  // the unauthenticated Google login/callback requests to /login.
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|apple-icon|icon).*)",
+    "/((?!api/|_next/static|_next/image|favicon.ico|sw\\.js|manifest\\.webmanifest|apple-icon|icon).*)",
   ],
 };
