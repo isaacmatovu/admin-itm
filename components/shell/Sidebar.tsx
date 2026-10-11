@@ -3,7 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Plus, ClipboardList, LayoutGrid, CheckSquare, Users, ShieldCheck, LogOut, Menu, X } from "lucide-react";
+import {
+  Plus,
+  ClipboardList,
+  LayoutGrid,
+  CheckSquare,
+  Users,
+  ShieldCheck,
+  LogOut,
+  Menu,
+  X,
+  PersonStanding,
+} from "lucide-react";
 import { clientApi } from "@/lib/api-client";
 import { initials } from "@/lib/format";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
@@ -23,7 +34,16 @@ const NAV_GROUPS = [
       { href: "/admin", label: "Company Overview", icon: LayoutGrid },
       { href: "/admin/approvals", label: "Approval Queue", icon: CheckSquare },
       { href: "/admin/users", label: "User Management", icon: Users },
-      { href: "/admin/login-audit", label: "Login Audit Log", icon: ShieldCheck },
+      {
+        href: "/admin/login-audit",
+        label: "Login Audit Log",
+        icon: ShieldCheck,
+      },
+      {
+        href: "/admin/alltasks",
+        label: "All Staff Tasks",
+        icon: PersonStanding,
+      },
     ],
   },
 ] as const;
@@ -88,7 +108,8 @@ export function Sidebar({
             height: 26,
             flex: "none",
             borderRadius: 8,
-            background: "linear-gradient(135deg, var(--color-accent), var(--color-accent-2))",
+            background:
+              "linear-gradient(135deg, var(--color-accent), var(--color-accent-2))",
             display: "grid",
             placeItems: "center",
             color: "#fff",
@@ -99,7 +120,14 @@ export function Sidebar({
         >
           IT
         </span>
-        <span style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 14.5, letterSpacing: "-0.01em" }}>
+        <span
+          style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: 14.5,
+            letterSpacing: "-0.01em",
+          }}
+        >
           Task Tracking
         </span>
       </header>
@@ -126,14 +154,22 @@ export function Sidebar({
           gap: 24,
         }}
       >
-        <div style={{ padding: "0 8px", display: "flex", alignItems: "center", gap: 10 }}>
+        <div
+          style={{
+            padding: "0 8px",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}
+        >
           <span
             style={{
               width: 32,
               height: 32,
               flex: "none",
               borderRadius: 9,
-              background: "linear-gradient(135deg, var(--color-accent), var(--color-accent-2))",
+              background:
+                "linear-gradient(135deg, var(--color-accent), var(--color-accent-2))",
               display: "grid",
               placeItems: "center",
               color: "#fff",
@@ -169,7 +205,10 @@ export function Sidebar({
         </div>
 
         {NAV_GROUPS.map((group) => (
-          <div key={group.label} style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+          <div
+            key={group.label}
+            style={{ display: "flex", flexDirection: "column", gap: 2 }}
+          >
             <div
               style={{
                 padding: "0 10px 6px",
@@ -195,9 +234,13 @@ export function Sidebar({
                     alignItems: "center",
                     gap: 10,
                     width: "100%",
-                    background: active ? "var(--color-accent-100)" : "transparent",
+                    background: active
+                      ? "var(--color-accent-100)"
+                      : "transparent",
                     borderRadius: 8,
-                    color: active ? "var(--color-accent-800)" : "var(--color-text)",
+                    color: active
+                      ? "var(--color-accent-800)"
+                      : "var(--color-text)",
                     fontSize: 14,
                     fontWeight: active ? 600 : 500,
                     padding: "10px 10px",
@@ -206,7 +249,12 @@ export function Sidebar({
                     transition: "background-color .12s ease",
                   }}
                 >
-                  <Icon size={16} strokeWidth={2} color={active ? "var(--color-accent)" : undefined} style={{ opacity: active ? 1 : 0.65, flex: "none" }} />
+                  <Icon
+                    size={16}
+                    strokeWidth={2}
+                    color={active ? "var(--color-accent)" : undefined}
+                    style={{ opacity: active ? 1 : 0.65, flex: "none" }}
+                  />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -258,14 +306,22 @@ export function Sidebar({
               <div
                 style={{
                   fontSize: 11.5,
-                  color: "color-mix(in srgb, var(--color-text) 55%, transparent)",
+                  color:
+                    "color-mix(in srgb, var(--color-text) 55%, transparent)",
                 }}
               >
                 {userRole}
               </div>
             </div>
           </div>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 8,
+            }}
+          >
             <button
               type="button"
               className="btn btn-ghost"

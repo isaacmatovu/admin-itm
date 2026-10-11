@@ -9,8 +9,17 @@ import { WorkStatusControl } from "@/components/tasks/WorkStatusControl";
 import { ResubmitButton } from "@/components/tasks/ResubmitButton";
 import { TaskDetailActions } from "@/components/tasks/TaskDetailActions";
 import { HistoryTimeline } from "@/components/tasks/HistoryTimeline";
-import { taskQueryOptions, profileQueryOptions, usersQueryOptions } from "@/lib/queries";
-import { formatDate, formatDuration, overdueDays, isOverdue } from "@/lib/format";
+import {
+  taskQueryOptions,
+  profileQueryOptions,
+  usersQueryOptions,
+} from "@/lib/queries";
+import {
+  formatDate,
+  formatDuration,
+  overdueDays,
+  isOverdue,
+} from "@/lib/format";
 import { Skeleton } from "@/components/ui/Skeleton";
 
 export function TaskDetailClient({ taskId }: { taskId: string }) {
@@ -28,7 +37,9 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
   const { task, history } = result;
   const directory = new Map(users.map((u) => [u.id, u]));
   const overdue = isOverdue(task);
-  const noDue = task.approval_status === "pending_approval" || task.approval_status === "needs_changes";
+  const noDue =
+    task.approval_status === "pending_approval" ||
+    task.approval_status === "needs_changes";
   const isAssignee = task.assignee_id === profile.id;
   const actorNames = new Map(users.map((u) => [u.id, u.display_name]));
 
@@ -38,27 +49,66 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
       : task.approval_status === "needs_changes"
         ? "Sent back — see note below"
         : `Approved ${formatDate(task.approved_at)}${
-            task.approved_by ? ` by ${directory.get(task.approved_by)?.display_name ?? "an admin"}` : ""
+            task.approved_by
+              ? ` by ${directory.get(task.approved_by)?.display_name ?? "an admin"}`
+              : ""
           }`;
 
-  const sentBack = [...history].reverse().find((h) => h.event_type === "sent_back");
+  const sentBack = [...history]
+    .reverse()
+    .find((h) => h.event_type === "sent_back");
 
   return (
-    <div style={{ display: "flex", flexWrap: "wrap", gap: 22, alignItems: "flex-start" }}>
-      <div style={{ flex: "2 1 400px", minWidth: 0, display: "flex", flexDirection: "column", gap: 18 }}>
-        <Blueprint style={{ padding: "20px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "flex-start", justifyContent: "space-between" }}>
+    <div
+      style={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 22,
+        alignItems: "flex-start",
+      }}
+    >
+      <div
+        style={{
+          flex: "2 1 400px",
+          minWidth: 0,
+          display: "flex",
+          flexDirection: "column",
+          gap: 18,
+        }}
+      >
+        <Blueprint
+          style={{
+            padding: "20px 22px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 14,
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 10,
+              alignItems: "flex-start",
+              justifyContent: "space-between",
+            }}
+          >
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 10.5, letterSpacing: ".12em", opacity: 0.5, fontVariantNumeric: "tabular-nums" }}>
-                {task.id.slice(0, 8)}
-              </div>
               <h3 style={{ margin: "3px 0 0", fontSize: 26 }}>{task.title}</h3>
             </div>
           </div>
           {task.description && (
-            <p style={{ margin: 0, fontSize: 14, opacity: 0.8, maxWidth: "68ch" }}>{task.description}</p>
+            <p
+              style={{
+                margin: 0,
+                fontSize: 14,
+                opacity: 0.8,
+                maxWidth: "68ch",
+              }}
+            >
+              {task.description}
+            </p>
           )}
-
           <div
             style={{
               display: "grid",
@@ -68,22 +118,74 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
               border: "1px solid var(--color-divider)",
             }}
           >
-            <div style={{ background: "var(--color-bg)", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 7 }}>
-              <div style={{ fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", opacity: 0.55, fontFamily: "var(--font-heading)" }}>
+            <div
+              style={{
+                background: "var(--color-bg)",
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 7,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  letterSpacing: ".16em",
+                  textTransform: "uppercase",
+                  opacity: 0.55,
+                  fontFamily: "var(--font-heading)",
+                }}
+              >
                 Approval status
               </div>
               <ApprovalBadge status={task.approval_status} />
-              <div style={{ fontSize: 11.5, opacity: 0.55 }}>{approvalMeta}</div>
+              <div style={{ fontSize: 11.5, opacity: 0.55 }}>
+                {approvalMeta}
+              </div>
             </div>
-            <div style={{ background: "var(--color-bg)", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 7 }}>
-              <div style={{ fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", opacity: 0.55, fontFamily: "var(--font-heading)" }}>
+            <div
+              style={{
+                background: "var(--color-bg)",
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 7,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  letterSpacing: ".16em",
+                  textTransform: "uppercase",
+                  opacity: 0.55,
+                  fontFamily: "var(--font-heading)",
+                }}
+              >
                 Work status
               </div>
               <WorkStatusControl taskId={task.id} status={task.work_status} />
-              <div style={{ fontSize: 11.5, opacity: 0.55 }}>Editable regardless of approval.</div>
+              <div style={{ fontSize: 11.5, opacity: 0.55 }}>
+                Editable regardless of approval.
+              </div>
             </div>
-            <div style={{ background: "var(--color-bg)", padding: "12px 14px", display: "flex", flexDirection: "column", gap: 7 }}>
-              <div style={{ fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", opacity: 0.55, fontFamily: "var(--font-heading)" }}>
+            <div
+              style={{
+                background: "var(--color-bg)",
+                padding: "12px 14px",
+                display: "flex",
+                flexDirection: "column",
+                gap: 7,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 10,
+                  letterSpacing: ".16em",
+                  textTransform: "uppercase",
+                  opacity: 0.55,
+                  fontFamily: "var(--font-heading)",
+                }}
+              >
                 {noDue ? "Requested duration" : "Due date"}
               </div>
               <div
@@ -94,7 +196,9 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
                   color: overdue ? "var(--st-over)" : "var(--color-text)",
                 }}
               >
-                {noDue ? formatDuration(task.duration_value, task.duration_unit) : formatDate(task.due_date)}
+                {noDue
+                  ? formatDuration(task.duration_value, task.duration_unit)
+                  : formatDate(task.due_date)}
               </div>
               <div style={{ fontSize: 11.5, opacity: 0.55 }}>
                 {noDue
@@ -120,8 +224,8 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
             >
               <Clock size={15} strokeWidth={1.5} style={{ flex: "none" }} />
               <span>
-                Overdue by {overdueDays(task.overdue_since)} days. Visible here and on dashboards
-                only — a weekly email starts at day 7.
+                Overdue by {overdueDays(task.overdue_since)} days. Visible here
+                and on dashboards only — a weekly email starts at day 7.
               </span>
             </div>
           )}
@@ -150,7 +254,8 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
               </div>
               <div style={{ fontSize: 14 }}>&ldquo;{sentBack.note}&rdquo;</div>
               <div style={{ fontSize: 11.5, opacity: 0.6 }}>
-                {actorNames.get(sentBack.actor_id) ?? "Admin"} · {formatDate(sentBack.created_at)}
+                {actorNames.get(sentBack.actor_id) ?? "Admin"} ·{" "}
+                {formatDate(sentBack.created_at)}
               </div>
               {isAssignee && (
                 <div style={{ marginTop: 4, alignSelf: "flex-start" }}>
@@ -170,14 +275,27 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
               borderTop: "1px solid var(--color-divider)",
             }}
           >
-            <span style={{ fontSize: 10, letterSpacing: ".16em", textTransform: "uppercase", opacity: 0.5, fontFamily: "var(--font-heading)", marginRight: 4 }}>
+            <span
+              style={{
+                fontSize: 10,
+                letterSpacing: ".16em",
+                textTransform: "uppercase",
+                opacity: 0.5,
+                fontFamily: "var(--font-heading)",
+                marginRight: 4,
+              }}
+            >
               Admin actions
             </span>
             <Link
               href={`/admin/approvals?review=${task.id}`}
               className="btn btn-primary"
               aria-disabled={task.approval_status === "approved"}
-              style={task.approval_status === "approved" ? { pointerEvents: "none", opacity: 0.45 } : undefined}
+              style={
+                task.approval_status === "approved"
+                  ? { pointerEvents: "none", opacity: 0.45 }
+                  : undefined
+              }
             >
               Approve…
             </Link>
@@ -185,7 +303,11 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
               href={`/admin/approvals?review=${task.id}`}
               className="btn btn-secondary"
               aria-disabled={task.approval_status === "approved"}
-              style={task.approval_status === "approved" ? { pointerEvents: "none", opacity: 0.45 } : undefined}
+              style={
+                task.approval_status === "approved"
+                  ? { pointerEvents: "none", opacity: 0.45 }
+                  : undefined
+              }
             >
               Send back…
             </Link>
@@ -194,12 +316,26 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
         </Blueprint>
       </div>
 
-      <Blueprint style={{ flex: "1 1 270px", minWidth: 0, padding: "18px 20px", display: "flex", flexDirection: "column", gap: 14 }}>
-        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+      <Blueprint
+        style={{
+          flex: "1 1 270px",
+          minWidth: 0,
+          padding: "18px 20px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 14,
+        }}
+      >
+        <div
+          style={{
+            display: "flex",
+            alignItems: "baseline",
+            justifyContent: "space-between",
+            gap: 10,
+          }}
+        >
           <h4 style={{ margin: 0, fontSize: 16, fontWeight: 700 }}>History</h4>
-          <span style={{ fontSize: 11, opacity: 0.5 }}>
-            Append-only
-          </span>
+          <span style={{ fontSize: 11, opacity: 0.5 }}>Append-only</span>
         </div>
         <HistoryTimeline history={history} actorNames={actorNames} />
       </Blueprint>

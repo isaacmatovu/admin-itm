@@ -30,7 +30,13 @@ export function taskListQueryString(params: TaskListParams): string {
   const qs = new URLSearchParams();
   qs.set("page", String(params.page));
   qs.set("page_size", String(params.page_size));
-  for (const key of ["search", "work_status", "approval_status", "due_after", "due_before"] as const) {
+  for (const key of [
+    "search",
+    "work_status",
+    "approval_status",
+    "due_after",
+    "due_before",
+  ] as const) {
     const v = params[key];
     if (v) qs.set(key, v);
   }
@@ -42,19 +48,29 @@ export function taskListQueryString(params: TaskListParams): string {
  * useSearchParams().get on the client — so both sides derive the exact
  * same params, and therefore the exact same query key, from the exact same
  * URL. */
-export function parseTaskListParams(get: (key: string) => string | undefined): TaskListParams {
+export function parseTaskListParams(
+  get: (key: string) => string | undefined,
+): TaskListParams {
   const params: TaskListParams = {
     page: Number(get("page")) || 1,
     page_size: Number(get("page_size")) || 25,
   };
-  for (const key of ["search", "work_status", "approval_status", "due_after", "due_before"] as const) {
+  for (const key of [
+    "search",
+    "work_status",
+    "approval_status",
+    "due_after",
+    "due_before",
+  ] as const) {
     const v = get(key);
     if (v) params[key] = v;
   }
   return params;
 }
 
-export function parseAuditLogParams(get: (key: string) => string | undefined): AuditLogParams {
+export function parseAuditLogParams(
+  get: (key: string) => string | undefined,
+): AuditLogParams {
   const limit = 50;
   const page = Number(get("page")) || 1;
   const params: AuditLogParams = { limit, offset: (page - 1) * limit };
@@ -84,5 +100,7 @@ export const queryKeys = {
   task: (id: string) => ["tasks", "detail", id] as const,
   adminSummary: ["admin", "summary"] as const,
   approvalQueue: ["admin", "approvals"] as const,
+  overdueTasks: ["admin", "overdue"] as const,
+  alltasks:["admin","alltasks"] as const,
   auditLog: (params: AuditLogParams) => ["admin", "audit", params] as const,
 };

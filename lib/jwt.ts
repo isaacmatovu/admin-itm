@@ -51,11 +51,15 @@ export async function verifySessionToken(
   try {
     const key = await getPublicKey();
     const { payload } = await jwtVerify(token, key, { issuer: "itm_server" });
-    if (typeof payload.user_id !== "string" || typeof payload.role !== "string") {
+    if (
+      typeof payload.user_id !== "string" ||
+      typeof payload.role !== "string"
+    ) {
       return null;
     }
     return payload as unknown as SessionClaims;
-  } catch {
+  } catch (err) {
+    console.error("[jwt] verify failed:", err);
     return null;
   }
 }

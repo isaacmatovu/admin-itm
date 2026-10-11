@@ -145,3 +145,51 @@ export interface AuditLogPage {
   data: AuditLogEntry[];
   pagination: { limit: number; offset: number; total: number };
 }
+
+export interface OverdueTask {
+  id: string;
+  title: string;
+  description: string;
+  work_status: string;
+  due_date: string;
+  overdue_since: string;
+  days_overdue: number;
+  assignee_id: string;
+  assignee_name: string;
+}
+
+export interface PaginatedOverdueTasks {
+  data: OverdueTask[];
+  page: number;
+  page_size: number;
+  total: number;
+}
+
+export interface AllTasksParams {
+  page: number;
+  workStatus?: string;
+  approvalStatus?: string;
+  search?: string;
+}
+
+export interface AdminTask {
+  id: string;
+  title: string;
+  description: string;
+  work_status: string;
+  approval_status: ApprovalStatus;
+  duration_value: number;
+  duration_unit: DurationUnit;
+  due_date: string | null;
+  overdue_since: string | null;
+  created_at: string;
+  assignee_id: string;
+  assignee_name: string;
+}
+
+export interface PaginatedAdminTasks {
+  data: AdminTask[];
+  page: number;
+  page_size: number;
+  total: number;
+}

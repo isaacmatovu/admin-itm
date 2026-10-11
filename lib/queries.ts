@@ -6,6 +6,8 @@
 // fetchQuery don't have a hook for — duplicating the two or three lines of
 // fetch call per key is simpler than building that plumbing.
 import { clientApi } from "./api-client";
+import { keepPreviousData } from "@tanstack/react-query";
+
 import {
   queryKeys,
   taskListQueryString,
@@ -21,6 +23,9 @@ import type {
   AdminSummaryResult,
   ApprovalQueueItem,
   AuditLogPage,
+  PaginatedOverdueTasks,
+  AllTasksParams,
+  PaginatedAdminTasks,
 } from "./api-types";
 
 export function profileQueryOptions() {
@@ -47,7 +52,8 @@ export function myTasksQueryOptions() {
 export function taskListQueryOptions(params: TaskListParams) {
   return {
     queryKey: queryKeys.taskList(params),
-    queryFn: () => clientApi<PaginatedTasks>(`/api/v1/tasks?${taskListQueryString(params)}`),
+    queryFn: () =>
+      clientApi<PaginatedTasks>(`/api/v1/tasks?${taskListQueryString(params)}`),
   };
 }
 
@@ -68,13 +74,40 @@ export function adminSummaryQueryOptions() {
 export function approvalQueueQueryOptions() {
   return {
     queryKey: queryKeys.approvalQueue,
-    queryFn: () => clientApi<ApprovalQueueItem[]>("/api/v1/admin/tasks/pending"),
+    queryFn: () =>
+      clientApi<ApprovalQueueItem[]>("/api/v1/admin/tasks/pending"),
+  };
+}
+
+export function overdueTasksQueryOptions() {
+  return {
+    queryKey: queryKeys.overdueTasks,
+    queryFn: () =>
+      clientApi<PaginatedOverdueTasks>(
+        "/api/v1/admin/tasks/overdue?page_size=100",
+      ),
+  };
+}
+
+export function allCompanyUsersTasksQueryOptions(p: AllTasksParams) {
+  const qs = new URLSearchParams({ page: String(p.page), page_size: "20" });
+  if (p.workStatus) qs.set("work_status", p.workStatus);
+  if (p.approvalStatus) qs.set("approval_status", p.approvalStatus);
+  if (p.search) qs.set("search", p.search);
+
+  return {
+    queryKey: [...queryKeys.alltasks, p] as const,
+    queryFn: () => clientApi<PaginatedAdminTasks>(`/api/v1/admin/tasks?${qs}`),
+    placeholderData: keepPreviousData,
   };
 }
 
 export function auditLogQueryOptions(params: AuditLogParams) {
   return {
     queryKey: queryKeys.auditLog(params),
-    queryFn: () => clientApi<AuditLogPage>(`/api/v1/admin/audit?${auditLogQueryString(params)}`),
+    queryFn: () =>
+      clientApi<AuditLogPage>(
+        `/api/v1/admin/audit?${auditLogQueryString(params)}`,
+      ),
   };
 }
