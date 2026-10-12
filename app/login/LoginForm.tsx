@@ -12,7 +12,7 @@ import {
   claimGoogleLogin,
   HANDOFF_WINDOW_MS,
   type Handoff,
-} from "@/lib/googlehandoff";
+} from "@/lib/google-handoff";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 
@@ -59,8 +59,11 @@ export function LoginForm({ initialError }: { initialError: boolean }) {
     void prepareHandoff().then((h) => (handoffRef.current = h));
 
     // Resume if the OS reloaded the PWA while the user was in Chrome.
+    // Deferred so setState isn't called synchronously inside the effect body.
     const resume = pendingHandoff();
-    if (resume) startPolling(resume.verifier, resume.ts);
+    const resumeTimer = resume
+      ? setTimeout(() => startPolling(resume.verifier, resume.ts), 0)
+      : null;
 
     // Coming back to the app: poll immediately.
     const onVisible = () => {
@@ -70,6 +73,7 @@ export function LoginForm({ initialError }: { initialError: boolean }) {
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
+      if (resumeTimer) clearTimeout(resumeTimer);
       stopPolling();
       document.removeEventListener("visibilitychange", onVisible);
     };
