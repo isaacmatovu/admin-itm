@@ -26,6 +26,7 @@ import type {
   PaginatedOverdueTasks,
   AllTasksParams,
   PaginatedAdminTasks,
+  CompanyTaskStats,
 } from "./api-types";
 
 export function profileQueryOptions() {
@@ -54,6 +55,13 @@ export function taskListQueryOptions(params: TaskListParams) {
     queryKey: queryKeys.taskList(params),
     queryFn: () =>
       clientApi<PaginatedTasks>(`/api/v1/tasks?${taskListQueryString(params)}`),
+  };
+}
+
+export function companyTaskStatsQueryOptions() {
+  return {
+    queryKey: ["admin", "task-stats"] as const,
+    queryFn: () => clientApi<CompanyTaskStats>("/api/v1/admin/task-stats"),
   };
 }
 

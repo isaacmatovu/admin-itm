@@ -8,7 +8,7 @@ export function StatCard({
   size = "md",
 }: {
   label: string;
-  value: string | number;
+  value: string | number | undefined;
   sub: string;
   color?: string;
   size?: "md" | "lg";
@@ -44,7 +44,9 @@ export function StatCard({
       >
         {value}
       </div>
-      <div style={{ fontSize: size === "lg" ? 12.5 : 12, opacity: 0.6 }}>{sub}</div>
+      <div style={{ fontSize: size === "lg" ? 12.5 : 12, opacity: 0.6 }}>
+        {sub}
+      </div>
     </Blueprint>
   );
 }

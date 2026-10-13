@@ -193,3 +193,14 @@ export interface PaginatedAdminTasks {
   page_size: number;
   total: number;
 }
+
+export type CompanyTaskStats = {
+  not_started: number;
+  in_progress: number;
+  done: number;
+  overdue: number;
+  needs_changes: number;
+  not_started_pending: number;
+  in_progress_approved: number;
+  in_progress_changes: number;
+};

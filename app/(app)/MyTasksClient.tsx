@@ -8,7 +8,15 @@ import { StatCard } from "@/components/ui/StatCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { TaskRow } from "@/components/tasks/TaskRow";
 import { ResubmitButton } from "@/components/tasks/ResubmitButton";
-import { profileQueryOptions, myTasksQueryOptions, adminSummaryQueryOptions, taskQueryOptions, usersQueryOptions } from "@/lib/queries";
+import {
+  profileQueryOptions,
+  taskListQueryOptions,
+  myTasksQueryOptions,
+  adminSummaryQueryOptions,
+  taskQueryOptions,
+  usersQueryOptions,
+  companyTaskStatsQueryOptions,
+} from "@/lib/queries";
 import { greeting, longDate, formatDateTime, isOverdue } from "@/lib/format";
 
 export function MyTasksClient() {
@@ -16,14 +24,28 @@ export function MyTasksClient() {
   const { data: profile } = useQuery(profileQueryOptions());
   const { data: tasks } = useQuery(myTasksQueryOptions());
   const { data: summary } = useQuery(adminSummaryQueryOptions());
+  const { data: stats } = useQuery(companyTaskStatsQueryOptions());
+  const statsQuery = useQuery(companyTaskStatsQueryOptions());
+  const sentBackQuery = useQuery(
+    taskListQueryOptions({
+      page: 1,
+      page_size: 1,
+      approval_status: "needs_changes",
+    }),
+  );
+  console.log("stats", statsQuery.status, statsQuery.error);
+  console.log("sentBack", sentBackQuery.status, sentBackQuery.error);
 
   const rows = tasks?.data ?? [];
-  const notStarted = rows.filter((t) => t.work_status === "not_started");
-  const inProgress = rows.filter((t) => t.work_status === "in_progress");
-  const done = rows.filter((t) => t.work_status === "done");
-  const overdue = rows.filter((t) => isOverdue(t));
-  const needsChanges = rows.filter((t) => t.approval_status === "needs_changes");
-  const needsChangesId = needsChanges[0]?.id;
+  const { data: sentBackList } = useQuery(
+    taskListQueryOptions({
+      page: 1,
+      approval_status: "needs_changes",
+      page_size: 1,
+    }),
+  );
+  const needsChangesCount = sentBackList?.total ?? 0;
+  const needsChangesId = sentBackList?.data[0]?.id;
 
   // Only fetched (server-prefetched too, see page.tsx) when there's
   // something to show a banner for.
@@ -31,14 +53,24 @@ export function MyTasksClient() {
     ...taskQueryOptions(needsChangesId ?? ""),
     enabled: Boolean(needsChangesId),
   });
-  const { data: users = [] } = useQuery({ ...usersQueryOptions(), enabled: Boolean(needsChangesId) });
+  const { data: users = [] } = useQuery({
+    ...usersQueryOptions(),
+    enabled: Boolean(needsChangesId),
+  });
 
   if (!profile || !tasks || !summary) return <Skeleton height={480} />;
 
-  let banner: { title: string; note: string; reviewer: string; when: string } | null = null;
+  let banner: {
+    title: string;
+    note: string;
+    reviewer: string;
+    when: string;
+  } | null = null;
   if (needsChangesId && sentBackDetail) {
     const directory = new Map(users.map((u) => [u.id, u]));
-    const sentBack = [...sentBackDetail.history].reverse().find((h) => h.event_type === "sent_back");
+    const sentBack = [...sentBackDetail.history]
+      .reverse()
+      .find((h) => h.event_type === "sent_back");
     if (sentBack) {
       banner = {
         title: sentBackDetail.task.title,
@@ -49,18 +81,41 @@ export function MyTasksClient() {
     }
   }
 
-  const inProgressApproved = inProgress.filter((t) => t.approval_status === "approved").length;
-  const inProgressChanges = inProgress.filter((t) => t.approval_status === "needs_changes").length;
-  const notStartedPending = notStarted.filter((t) => t.approval_status === "pending_approval").length;
+  if (!profile || !tasks || !summary || !stats)
+    return <Skeleton height={480} />;
 
   return (
     <>
-      <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 12 }}>
+      <div
+        style={{
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: 12,
+        }}
+      >
         <div>
-          <h3 style={{ margin: 0, fontSize: 28, fontWeight: 700, letterSpacing: "-0.02em" }}>{greeting(profile.display_name)}</h3>
-          <div style={{ fontSize: 13.5, opacity: 0.6, marginTop: 2 }}>{longDate()}</div>
+          <h3
+            style={{
+              margin: 0,
+              fontSize: 28,
+              fontWeight: 700,
+              letterSpacing: "-0.02em",
+            }}
+          >
+            {greeting(profile.display_name)}
+          </h3>
+          <div style={{ fontSize: 13.5, opacity: 0.6, marginTop: 2 }}>
+            {longDate()}
+          </div>
         </div>
-        <Blueprint as={Link} href="/tasks/new" className="btn btn-primary" style={{ minHeight: 40 }}>
+        <Blueprint
+          as={Link}
+          href="/tasks/new"
+          className="btn btn-primary"
+          style={{ minHeight: 40 }}
+        >
           <Plus size={15} strokeWidth={1.5} />
           Create Task
         </Blueprint>
@@ -89,43 +144,64 @@ export function MyTasksClient() {
                 color: "var(--st-changes)",
               }}
             >
-              {needsChanges.length} task{needsChanges.length === 1 ? "" : "s"} sent back for changes
+              {needsChangesCount} task{needsChangesCount === 1 ? "" : "s"} sent
+              back for changes
             </div>
             <div style={{ fontSize: 14, marginTop: 5 }}>{banner.title}</div>
-            <div style={{ fontSize: 13, opacity: 0.75, marginTop: 4, fontStyle: "italic" }}>
+            <div
+              style={{
+                fontSize: 13,
+                opacity: 0.75,
+                marginTop: 4,
+                fontStyle: "italic",
+              }}
+            >
               &ldquo;{banner.note}&rdquo; — {banner.reviewer}, {banner.when}
             </div>
           </div>
           <div style={{ display: "flex", gap: 8 }}>
-            <Link href={`/tasks/${needsChanges[0].id}`} className="btn btn-secondary">
+            <Link
+              href={`/tasks/${needsChangesId}`}
+              className="btn btn-secondary"
+            >
               Open
             </Link>
-            <ResubmitButton taskId={needsChanges[0].id} />
+            <ResubmitButton taskId={needsChangesId!} />
           </div>
         </Blueprint>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 12,
+        }}
+      >
         <StatCard
           label="Not started"
-          value={notStarted.length}
-          sub={notStartedPending > 0 ? `${notStartedPending} awaiting approval` : "Nothing queued"}
+          value={stats.not_started}
+          sub={
+            stats.not_started_pending > 0
+              ? `${stats.not_started_pending} awaiting approval`
+              : "Nothing queued"
+          }
         />
         <StatCard
           label="In progress"
-          value={inProgress.length}
+          value={stats.in_progress}
           sub={
-            inProgress.length > 0
-              ? `${inProgressApproved} approved, ${inProgressChanges} sent back`
+            stats.in_progress > 0
+              ? `${stats.in_progress_approved} approved, ${stats.in_progress_changes} sent back`
               : "Nothing open"
           }
         />
-        <StatCard label="Done" value={done.length} sub="Closed this month" />
+        <StatCard label="Done" value={stats.done} sub="Closed this month" />
         <StatCard
           label="Overdue"
-          value={overdue.length}
-          sub={overdue.length > 0 ? "Past due, not yet done" : "All clear"}
-          color={overdue.length > 0 ? "var(--st-over)" : undefined}
+          value={stats.overdue}
+          sub={stats.overdue > 0 ? "Past due, not yet done" : "All clear"}
+          color={stats.overdue > 0 ? "var(--st-over)" : undefined}
         />
       </div>
 
@@ -150,21 +226,50 @@ export function MyTasksClient() {
               placeItems: "center",
             }}
           >
-            <ClipboardList size={26} strokeWidth={2} color="var(--color-accent)" />
+            <ClipboardList
+              size={26}
+              strokeWidth={2}
+              color="var(--color-accent)"
+            />
           </span>
-          <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 19 }}>
+          <div
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 700,
+              fontSize: 19,
+            }}
+          >
             No tasks yet
           </div>
-          <p style={{ fontSize: 13.5, opacity: 0.65, maxWidth: "40ch", margin: 0 }}>
-            Everything you&apos;re working on will live here. Create your first task to get started.
+          <p
+            style={{
+              fontSize: 13.5,
+              opacity: 0.65,
+              maxWidth: "40ch",
+              margin: 0,
+            }}
+          >
+            Everything you&apos;re working on will live here. Create your first
+            task to get started.
           </p>
-          <Link href="/tasks/new" className="btn btn-primary" style={{ minHeight: 40 }}>
+          <Link
+            href="/tasks/new"
+            className="btn btn-primary"
+            style={{ minHeight: 40 }}
+          >
             Create your first task
           </Link>
         </Blueprint>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              gap: 12,
+            }}
+          >
             <h4 style={{ margin: 0, fontSize: 17, fontWeight: 700 }}>
               My tasks
             </h4>
@@ -190,7 +295,8 @@ export function MyTasksClient() {
           alignItems: "center",
           justifyContent: "space-between",
           gap: 12,
-          background: "linear-gradient(120deg, var(--color-accent-100), color-mix(in srgb, var(--color-accent) 6%, var(--color-surface)))",
+          background:
+            "linear-gradient(120deg, var(--color-accent-100), color-mix(in srgb, var(--color-accent) 6%, var(--color-surface)))",
           border: "1px solid var(--color-accent-200)",
         }}
       >
@@ -206,12 +312,18 @@ export function MyTasksClient() {
           >
             Admin
           </div>
-          <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 18 }}>
+          <div
+            style={{
+              fontFamily: "var(--font-heading)",
+              fontWeight: 700,
+              fontSize: 18,
+            }}
+          >
             Company Overview
           </div>
           <div style={{ fontSize: 12.5, opacity: 0.65, marginTop: 1 }}>
-            {summary.total_overdue} overdue · {summary.pending_approval} pending approval ·{" "}
-            {summary.needs_changes} need changes
+            {summary.total_overdue} overdue · {summary.pending_approval} pending
+            approval · {summary.needs_changes} need changes
           </div>
         </div>
         <Link href="/admin" className="btn btn-primary">
