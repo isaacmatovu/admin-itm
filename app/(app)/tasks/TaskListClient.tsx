@@ -123,15 +123,6 @@ export function TaskListClient() {
                   <div
                     style={{ display: "flex", alignItems: "center", gap: 8 }}
                   >
-                    <span
-                      style={{
-                        fontSize: 10.5,
-                        opacity: 0.5,
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {t.id.slice(0, 8)}
-                    </span>
                     <Link
                       href={`/tasks/${t.id}`}
                       style={{ color: "var(--color-text)" }}
