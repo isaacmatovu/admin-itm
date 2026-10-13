@@ -130,15 +130,6 @@ export default function AllTasksClient() {
                     <div
                       style={{ display: "flex", alignItems: "center", gap: 8 }}
                     >
-                      <span
-                        style={{
-                          fontSize: 10.5,
-                          opacity: 0.5,
-                          fontVariantNumeric: "tabular-nums",
-                        }}
-                      >
-                        {r.id.slice(0, 8)}
-                      </span>
                       <span style={{ color: "var(--color-text)" }}>
                         {r.title}
                       </span>
@@ -158,7 +149,6 @@ export default function AllTasksClient() {
                     }}
                   >
                     {r.due_date ? formatDate(r.due_date) : "—"}
-                 
                   </td>
                   <td>
                     <ApprovalBadge status={r.approval_status} />
