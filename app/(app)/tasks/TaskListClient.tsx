@@ -11,19 +11,55 @@ import { WorkStatusSelect } from "@/components/tasks/WorkStatusSelect";
 import { Pagination } from "@/components/ui/Pagination";
 import { parseTaskListParams } from "@/lib/query-keys";
 import { taskListQueryOptions } from "@/lib/queries";
+import { Skeleton } from "@/components/ui/Skeleton";
 
 export function TaskListClient() {
   const searchParams = useSearchParams();
-  const params = parseTaskListParams((key) => searchParams.get(key) ?? undefined);
+  const params = parseTaskListParams(
+    (key) => searchParams.get(key) ?? undefined,
+  );
   const filtered = Boolean(
-    params.search || params.work_status || params.approval_status || params.due_after || params.due_before,
+    params.search ||
+    params.work_status ||
+    params.approval_status ||
+    params.due_after ||
+    params.due_before,
   );
 
   // Hydrated from the server page's prefetch (same params → same key) on
   // first paint; a filter/page change lands on a URL the server hasn't
   // prefetched, so this fetches that one — and every one visited once
   // stays cached for instant back/forward.
-  const { data } = useQuery(taskListQueryOptions(params));
+  const { data, isPending, isError, refetch } = useQuery(
+    taskListQueryOptions(params),
+  );
+
+  if (isPending) return <Skeleton height={320} />;
+
+  if (isError) {
+    return (
+      <Blueprint
+        style={{
+          padding: "40px 24px",
+          textAlign: "center",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 12,
+        }}
+      >
+        <div style={{ fontWeight: 700 }}>Couldn't load tasks</div>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => refetch()}
+        >
+          Try again
+        </button>
+      </Blueprint>
+    );
+  }
+
   const rows = data?.data ?? [];
   const total = data?.total ?? 0;
 
@@ -39,10 +75,25 @@ export function TaskListClient() {
           textAlign: "center",
         }}
       >
-        <span style={{ width: 56, height: 56, borderRadius: "50%", background: "var(--color-accent-100)", display: "grid", placeItems: "center" }}>
+        <span
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: "50%",
+            background: "var(--color-accent-100)",
+            display: "grid",
+            placeItems: "center",
+          }}
+        >
           <Search size={26} strokeWidth={2} color="var(--color-accent)" />
         </span>
-        <div style={{ fontFamily: "var(--font-heading)", fontWeight: 700, fontSize: 18 }}>
+        <div
+          style={{
+            fontFamily: "var(--font-heading)",
+            fontWeight: 700,
+            fontSize: 18,
+          }}
+        >
           No tasks match these filters
         </div>
         <Link href="/tasks" className="btn btn-secondary">
@@ -69,11 +120,22 @@ export function TaskListClient() {
             {rows.map((t) => (
               <tr key={t.id}>
                 <td>
-                  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                    <span style={{ fontSize: 10.5, opacity: 0.5, fontVariantNumeric: "tabular-nums" }}>
+                  <div
+                    style={{ display: "flex", alignItems: "center", gap: 8 }}
+                  >
+                    <span
+                      style={{
+                        fontSize: 10.5,
+                        opacity: 0.5,
+                        fontVariantNumeric: "tabular-nums",
+                      }}
+                    >
                       {t.id.slice(0, 8)}
                     </span>
-                    <Link href={`/tasks/${t.id}`} style={{ color: "var(--color-text)" }}>
+                    <Link
+                      href={`/tasks/${t.id}`}
+                      style={{ color: "var(--color-text)" }}
+                    >
                       {t.title}
                     </Link>
                   </div>
@@ -85,7 +147,11 @@ export function TaskListClient() {
                   <WorkBadge status={t.work_status} />
                 </td>
                 <td style={{ whiteSpace: "nowrap" }}>
-                  <DateChip due_date={t.due_date} overdue_since={t.overdue_since} work_status={t.work_status} />
+                  <DateChip
+                    due_date={t.due_date}
+                    overdue_since={t.overdue_since}
+                    work_status={t.work_status}
+                  />
                 </td>
                 <td style={{ textAlign: "right" }}>
                   <WorkStatusSelect taskId={t.id} status={t.work_status} />
@@ -111,7 +177,11 @@ export function TaskListClient() {
             ? `Showing ${rows.length} of ${total} tasks · filters applied`
             : `Showing ${rows.length} of ${total} tasks`}
         </span>
-        <Pagination page={params.page} pageSize={params.page_size} total={total} />
+        <Pagination
+          page={params.page}
+          pageSize={params.page_size}
+          total={total}
+        />
       </div>
     </div>
   );
