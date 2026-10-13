@@ -9,7 +9,7 @@ export function StatCard({
 }: {
   label: string;
   value: string | number | undefined;
-  sub: string;
+  sub: string | undefined;
   color?: string;
   size?: "md" | "lg";
 }) {

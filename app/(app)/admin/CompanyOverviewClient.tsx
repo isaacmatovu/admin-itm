@@ -54,7 +54,9 @@ export function CompanyOverviewClient() {
         <StatCard
           label="Total overdue"
           value={stats?.overdue}
-          sub={zero ? "Nothing past due" : "Across active tasks"}
+          sub={
+            (stats?.overdue ?? 0) > 0 ? "Active overdues" : "Nothing past due"
+          }
           color={summary.total_overdue > 0 ? "var(--st-over)" : undefined}
           size="lg"
         />

@@ -94,6 +94,7 @@ export function TaskDetailClient({ taskId }: { taskId: string }) {
             }}
           >
             <div style={{ minWidth: 0 }}>
+              <p>Title</p>
               <h3 style={{ margin: "3px 0 0", fontSize: 26 }}>{task.title}</h3>
             </div>
           </div>

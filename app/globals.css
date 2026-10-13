@@ -630,3 +630,184 @@ dialog.dialog::backdrop {
     max-width: 1280px;
   }
 }
+
+/* — Task detail — */
+.td-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+}
+@media (min-width: 1040px) {
+  /* app-main is ~780px wide here, enough for 2 columns beside the sidebar */
+  .td-layout {
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+    gap: 22px;
+    align-items: start;
+  }
+}
+.td-pad {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+}
+@media (min-width: 640px) {
+  .td-pad {
+    padding: 20px 22px;
+  }
+}
+.td-title {
+  margin: 3px 0 0;
+  font-size: clamp(20px, 5.5vw, 26px);
+  overflow-wrap: anywhere;
+}
+.td-desc {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.8;
+  max-width: 68ch;
+  overflow-wrap: anywhere;
+}
+.td-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(170px, 100%), 1fr));
+  gap: 1px;
+  background: var(--color-divider);
+  border: 1px solid var(--color-divider);
+}
+.td-meta-cell {
+  background: var(--color-bg);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+}
+.td-label {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  font-family: var(--font-heading);
+}
+.td-hint {
+  font-size: 11.5px;
+  opacity: 0.55;
+}
+.td-due {
+  font-family: var(--font-heading);
+  font-size: 19px;
+  letter-spacing: 0.02em;
+  color: var(--color-text);
+}
+.td-due[data-overdue="true"] {
+  color: var(--st-over);
+}
+.td-overdue {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  padding: 9px 12px;
+  border: 1px solid var(--st-over);
+  color: var(--st-over);
+  font-size: 13px;
+}
+.td-sentback {
+  padding: 14px 16px;
+  background: var(--st-changes-bg);
+  border-radius: var(--radius-md);
+  border-left: 3px solid var(--st-changes);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.td-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  align-items: center;
+  padding-top: 12px;
+  border-top: 1px solid var(--color-divider);
+}
+.td-actions-label {
+  flex-basis: 100%;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  opacity: 0.5;
+  font-family: var(--font-heading);
+}
+/* phones: buttons share the row; ≥640px they size to content */
+.td-actions .btn {
+  flex: 1 1 140px;
+}
+@media (min-width: 640px) {
+  .td-actions-label {
+    flex-basis: auto;
+    margin-right: 4px;
+  }
+  .td-actions .btn {
+    flex: none;
+  }
+}
+.td-disabled {
+  pointer-events: none;
+  opacity: 0.45;
+}
+
+/* — Modal form helpers — */
+.modal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* phones: the modal's buttons share the row instead of cramping to the right */
+@media (max-width: 639px) {
+  .modal-actions .btn {
+    flex: 1 1 140px;
+  }
+}
+.duration-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.duration-row .input {
+  width: 78px;
+  flex: none;
+}
+
+/* Delete sits at the far right on desktop, full-width row on phones */
+.td-actions .td-delete {
+  margin-left: auto;
+  color: var(--st-changes);
+}
+@media (max-width: 639px) {
+  .td-actions .td-delete {
+    flex: 1 1 100%;
+    margin-left: 0;
+  }
+}
+.input {
+  min-width: 0;
+} /* stops long <select> option text from forcing overflow */
+
+
+/* — Segmented control: never wider than its container — */
+.work-status { min-width: 0; max-width: 100%; }
+.seg {
+  max-width: 100%;
+  flex-wrap: wrap;
+}
+.seg-opt { white-space: nowrap; }
+
+@media (max-width: 639px) {
+  .seg-opt {
+    padding: 7px 10px;
+    flex: 1 1 auto;
+    justify-content: center;
+  }
+}

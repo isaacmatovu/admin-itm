@@ -32,10 +32,18 @@ export function HistoryTimeline({
   actorNames: Map<string, string>;
 }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
       {history.map((h, i) => (
         <div key={h.id} style={{ display: "flex", gap: 12, paddingBottom: 16 }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: "none", width: 12 }}>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              flex: "none",
+              width: 12,
+            }}
+          >
             <span
               style={{
                 width: 7,
@@ -46,10 +54,12 @@ export function HistoryTimeline({
               }}
             />
             {i < history.length - 1 && (
-              <span style={{ width: 1, flex: 1, background: "var(--color-divider)", marginTop: 4 }} />
+              <span
+                style={{ width: 1, flex: 1, background: "var(--color-divider)", marginTop: 4 }}
+              />
             )}
           </div>
-          <div style={{ minWidth: 0 }}>
+          <div style={{ minWidth: 0, flex: 1 }}>
             <div
               style={{
                 fontSize: 12,
@@ -61,8 +71,19 @@ export function HistoryTimeline({
             >
               {EVENT_LABEL[h.event_type]}
             </div>
-            {h.note && <div style={{ fontSize: 13, opacity: 0.85 }}>{h.note}</div>}
-            <div style={{ fontSize: 11, opacity: 0.5, fontVariantNumeric: "tabular-nums" }}>
+            {h.note && (
+              <div style={{ fontSize: 13, opacity: 0.85, overflowWrap: "anywhere" }}>
+                {h.note}
+              </div>
+            )}
+            <div
+              style={{
+                fontSize: 11,
+                opacity: 0.5,
+                fontVariantNumeric: "tabular-nums",
+                overflowWrap: "anywhere",
+              }}
+            >
               {actorNames.get(h.actor_id) ?? "Someone"} · {formatDateTime(h.created_at)}
             </div>
           </div>

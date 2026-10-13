@@ -65,7 +65,7 @@ export function WorkStatusControl({
   }
 
   return (
-    <div>
+    <div className="work-status">
       <SegmentedControl
         name={`work-${taskId}`}
         options={OPTIONS}
@@ -75,7 +75,16 @@ export function WorkStatusControl({
         disabled={disabled}
       />
       {error && (
-        <div style={{ fontSize: 11, color: "var(--st-changes)", marginTop: 4 }}>{error}</div>
+        <div
+          style={{
+            fontSize: 11,
+            color: "var(--st-changes)",
+            marginTop: 4,
+            overflowWrap: "anywhere",
+          }}
+        >
+          {error}
+        </div>
       )}
     </div>
   );
